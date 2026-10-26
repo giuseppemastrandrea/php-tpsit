@@ -22,6 +22,9 @@
                                                     blocchi data-html VUOTI
                                                     (gli altri vengono solo controllati)
 
+   Alla fine controlla anche che le "sezioni" dei moduli in corso.js (l'indice
+   del corso nella home) corrispondano ai titoli h2 delle dispense.
+
    I blocchi data-html con l'attributo data-variabile (output che cambia a
    ogni richiesta, per esempio con date()) vengono eseguiti ma non confrontati.
    ========================================================================== */
@@ -193,5 +196,30 @@ foreach ($file as $f) {
     if ($riempiti > 0) file_put_contents($f, $nuovo);
 }
 
-echo "\n" . ($errori === 0 ? "Tutto a posto: $totale esempi controllati.\n" : "$errori esempi su $totale da correggere.\n");
+// Indice del corso: le "sezioni" di corso.js devono corrispondere ai titoli h2
+// (con id) delle dispense, tranne l'introduzione
+echo "\nIndice del corso (corso.js)\n";
+$corso = (string) file_get_contents(__DIR__ . '/../corso.js');
+preg_match_all('#percorso: "([^"]+)",\s*sezioni: \[(.*?)\n\s*\]#s', $corso, $moduli, PREG_SET_ORDER);
+foreach ($moduli as [, $percorso, $elenco]) {
+    preg_match_all('#\{ id: "([^"]+)", titolo: ("(?:[^"\\\\]|\\\\.)*") \}#', $elenco, $voci, PREG_SET_ORDER);
+    $nelCorso = array_map(fn($v) => $v[1] . ' ' . json_decode($v[2]), $voci);
+    $html = (string) @file_get_contents(__DIR__ . '/../' . $percorso);
+    preg_match_all('#<h2 id="([^"]+)">(.*?)</h2>#s', $html, $titoli, PREG_SET_ORDER);
+    $nellaDispensa = [];
+    foreach ($titoli as [, $id, $testo]) {
+        if ($id === 'introduzione') continue;
+        $nellaDispensa[] = $id . ' ' . html_entity_decode(strip_tags($testo), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    }
+    if ($nelCorso === $nellaDispensa) {
+        echo "  ✓ $percorso\n";
+    } else {
+        $errori++;
+        echo "  ✗ $percorso: le sezioni in corso.js non corrispondono ai titoli h2\n";
+        foreach (array_diff($nellaDispensa, $nelCorso) as $x) echo "    manca in corso.js: $x\n";
+        foreach (array_diff($nelCorso, $nellaDispensa) as $x) echo "    non c'è nella dispensa: $x\n";
+    }
+}
+
+echo "\n" . ($errori === 0 ? "Tutto a posto: $totale esempi controllati.\n" : "$errori problemi da correggere ($totale esempi controllati).\n");
 exit($errori === 0 ? 0 : 1);

@@ -334,6 +334,31 @@ kbd {
   border: 1px solid var(--bordo);
 }
 
+/* Indice del corso nella home: moduli e sezioni, su due colonne se c'è spazio */
+.indice-corso {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+  gap: 0.5rem 2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.indice-corso-modulo { margin: 0 0 1rem; }
+.indice-corso-titolo {
+  display: block;
+  padding-bottom: 0.3rem;
+  margin-bottom: 0.4rem;
+  border-bottom: 2px solid var(--bordo);
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-decoration: none;
+}
+a.indice-corso-titolo:hover { text-decoration: underline; }
+.indice-corso-numero { font-family: var(--font-codice); color: var(--testo-tenue); }
+.indice-corso-sezioni { margin: 0; padding: 0; list-style: none; }
+.indice-corso-sezioni li { margin: 0; }
+.indice-corso-sezioni a { display: inline-block; padding: 0.1rem 0; }
+
 /* moduli in preparazione: visibili ma non cliccabili, con etichetta testuale */
 .scheda-preparazione { opacity: 0.75; border-style: dashed; box-shadow: none; }
 .etichetta-stato {

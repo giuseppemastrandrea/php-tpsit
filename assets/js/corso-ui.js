@@ -1,6 +1,7 @@
 /* ==========================================================================
    corso-ui.js — genera, a partire da corso.js:
    - le schede della home (elementi con id "elenco-moduli" ed "elenco-strumenti");
+   - l'indice del corso nella home (elemento con id "indice-corso");
    - i collegamenti "Modulo precedente / successivo" in fondo alle dispense
      (elemento con attributo data-navigazione-moduli).
 
@@ -71,6 +72,39 @@
     }
   }
 
+  // Indice del corso: ogni modulo con le sue sezioni (campo "sezioni" di corso.js)
+  function riempiIndice() {
+    const elenco = document.getElementById("indice-corso");
+    if (!elenco) return;
+    const moduli = CORSO.moduli.slice().sort(function (a, b) { return a.numero - b.numero; });
+    moduli.forEach(function (m) {
+      const pubblicato = m.stato === "pubblicato";
+      const li = crea("li", "indice-corso-modulo");
+      const titolo = crea(pubblicato ? "a" : "span", "indice-corso-titolo");
+      titolo.appendChild(crea("span", "indice-corso-numero", String(m.numero).padStart(2, "0")));
+      titolo.appendChild(document.createTextNode(" " + m.titolo + (pubblicato ? "" : " (in preparazione)")));
+      if (pubblicato) titolo.href = radice() + m.percorso;
+      li.appendChild(titolo);
+
+      if (m.sezioni && m.sezioni.length) {
+        const sotto = crea("ol", "indice-corso-sezioni");
+        m.sezioni.forEach(function (s) {
+          const voce = crea("li");
+          if (pubblicato) {
+            const a = crea("a", "", s.titolo);
+            a.href = radice() + m.percorso + "#" + s.id;
+            voce.appendChild(a);
+          } else {
+            voce.textContent = s.titolo;
+          }
+          sotto.appendChild(voce);
+        });
+        li.appendChild(sotto);
+      }
+      elenco.appendChild(li);
+    });
+  }
+
   function creaNavigazioneModuli() {
     const contenitore = document.querySelector("[data-navigazione-moduli]");
     const idModulo = document.body.getAttribute("data-modulo");
@@ -108,6 +142,7 @@
       return;
     }
     riempiHome();
+    riempiIndice();
     creaNavigazioneModuli();
   });
 })();

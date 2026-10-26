@@ -55,6 +55,9 @@ CLAUDE.md                  convenzioni del progetto (utili anche per lavorare co
    e, nel tag `<body>`, l'attributo `data-modulo="03-condizioni"`.
 3. Registra il modulo in `corso.js`, aggiungendo una voce all'elenco `moduli`
    (con `stato: "in preparazione"` la scheda si vede ma non è cliccabile).
+   Nel campo `sezioni` elenca i titoli `h2` della dispensa (id e testo): compaiono
+   nell'**Indice del corso** in home. Il controllo `verifica-esempi.php` ti avvisa se non
+   corrispondono più ai titoli.
 4. Scrivi i contenuti: il modello contiene un esempio di ogni elemento.
 
 ## Scrivere un esempio PHP

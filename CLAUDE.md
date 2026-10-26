@@ -37,7 +37,7 @@ durante l'anno: un **modulo** (dispensa) per ogni argomento, più eventuali **st
 ```
 README.md                 presentazione del corso e istruzioni
 CLAUDE.md                 questo file
-index.html                home del corso: schede generate da corso.js
+index.html                home del corso: schede e indice delle sezioni, generati da corso.js
 corso.js                  elenco di moduli e strumenti
 assets/
   css/base.css            variabili, temi, tipografia, barra, pulsanti, box, tabelle, codice, stampa
@@ -60,7 +60,9 @@ moduli/
 1. Copiare `moduli/_modello/` in `moduli/NN-nome/`.
 2. Nel `<body>` impostare `data-modulo="NN-nome"` (uguale all'`id` in `corso.js`), lasciare `data-radice="../../"`.
 3. Aggiornare `<title>`, il titolo nella barra, `<h1>` e sottotitolo.
-4. Registrare il modulo in `corso.js` (`stato: "in preparazione"` → scheda visibile ma non cliccabile).
+4. Registrare il modulo in `corso.js` (`stato: "in preparazione"` → scheda visibile ma non cliccabile),
+   con il campo `sezioni`: id e testo di ogni `h2` tranne l'introduzione. Serve all'indice del corso
+   nella home; `verifica-esempi.php` segnala se non corrisponde più ai titoli della dispensa.
 5. Scrivere i contenuti. Lasciare vuoti i `data-html` e riempirli con
    `php controlli/verifica-esempi.php --riempi`; alla fine controllare che tutto sia ✓.
 
