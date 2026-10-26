@@ -1,0 +1,21 @@
+/* ==========================================================================
+   modulo.css — stili specifici del modulo 01
+   Schema SVG "richiesta e risposta": i colori vengono dalle variabili del
+   tema, così lo schema si legge sia in chiaro sia in scuro.
+   (L'anatomia di un indirizzo, .indirizzo, è in dispensa.css.)
+   ========================================================================== */
+.schema text {
+  fill: var(--testo);
+  font-family: var(--font-testo);
+  font-size: 15px;
+}
+.schema .schema-titolo { font-size: 17px; font-weight: 700; }
+.schema .schema-tenue { fill: var(--testo-tenue); font-size: 13px; }
+.schema .schema-codice { font-family: var(--font-codice); font-size: 13px; }
+.schema .schema-box { fill: var(--superficie); stroke: var(--testo); stroke-width: 2; }
+.schema .schema-zona { fill: var(--sfondo-alt); stroke: var(--bordo); stroke-width: 1.5; stroke-dasharray: 6 4; }
+.schema .schema-php { fill: var(--tk-php-tag-sfondo); stroke: var(--tk-php-tag); stroke-width: 2; }
+.schema .schema-freccia { stroke: var(--testo); stroke-width: 2; fill: none; }
+.schema .schema-freccia-html { stroke: var(--accento); stroke-width: 3; fill: none; }
+.schema .schema-punta { fill: var(--testo); }
+.schema .schema-punta-html { fill: var(--accento); }

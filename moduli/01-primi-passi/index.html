@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Primi passi con PHP · TPSIT 5° anno</title>
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/dispensa.css">
+  <link rel="stylesheet" href="modulo.css">
+  <script src="../../assets/js/tema.js"></script>
+  <script src="../../corso.js" defer></script>
+  <script src="../../assets/js/corso-ui.js" defer></script>
+  <script src="../../assets/js/dispensa.js" defer></script>
+  <script src="../../assets/js/codice.js" defer></script>
+</head>
+<body data-radice="../../" data-modulo="01-primi-passi">
+
+  <header class="barra">
+    <button type="button" class="pulsante indice-apri" aria-controls="indice" aria-expanded="false">☰ Indice</button>
+    <a class="barra-home" href="../../index.html">← Home <span class="testo-lungo">del corso</span></a>
+    <span class="barra-titolo">Primi passi con PHP</span>
+    <button type="button" class="pulsante tema-interruttore" data-tema-interruttore>☾ Scuro</button>
+  </header>
+
+  <div class="dispensa">
+    <nav class="dispensa-indice" id="indice" aria-label="Indice della dispensa">
+      <p class="indice-titolo">Indice</p>
+      <ol data-indice></ol>
+    </nav>
+
+    <main class="dispensa-contenuto">
+      <header class="dispensa-intestazione">
+        <p class="scheda-numero">Modulo 01</p>
+        <h1>Primi passi con PHP</h1>
+        <p class="sottotitolo">Il server sul tuo PC, le porte, i tag &lt;?php e ?&gt;, echo. E una domanda: che cosa arriva davvero al browser?</p>
+      </header>
+
+      <!-- ================================================================
+           INTRODUZIONE
+           ================================================================ -->
+      <section>
+        <h2 id="introduzione">Introduzione</h2>
+
+        <p>Finora le tue pagine web erano file <code>.html</code>: il browser li apriva e li mostrava così come li avevi scritti. Una pagina così si chiama <strong>statica</strong>: è uguale per tutti e non cambia mai, finché qualcuno non modifica il file.</p>
+
+        <p>I siti che usi ogni giorno non funzionano così. Il registro elettronico ti mostra i <strong>tuoi</strong> voti, un negozio online i <strong>suoi</strong> prodotti di oggi, con i prezzi aggiornati. Nessuno ha scritto a mano una pagina HTML per ogni studente o per ogni prodotto: la pagina viene <strong>costruita al momento</strong>, da un programma, ogni volta che qualcuno la chiede. Una pagina così si chiama <strong>dinamica</strong>.</p>
+
+        <p><strong>PHP</strong> è uno dei linguaggi più usati per scrivere questi programmi. In questa dispensa:</p>
+        <ol>
+          <li>capiamo chi fa cosa tra <strong>client</strong> e <strong>server</strong>;</li>
+          <li>avviamo un server web sul nostro PC con <strong>XAMPP</strong> o <strong>EasyPHP</strong>, e capiamo cosa sono le <strong>porte</strong>;</li>
+          <li>scriviamo il primo script con <code>&lt;?php</code>, <code>?&gt;</code> ed <code>echo</code>;</li>
+          <li>scopriamo la cosa più importante di tutte: <strong>il codice PHP non arriva mai al browser</strong>.</li>
+        </ol>
+
+        <aside class="box box-regola">
+          <p><strong>Come usare questa dispensa</strong>: ogni esempio PHP ha tre schede. <strong>① Sul server</strong> è il file che scrivi tu. <strong>② Spedito al browser</strong> è ciò che il server manda in rete. <strong>③ Nel browser</strong> è la pagina che vede l'utente. Guardale sempre tutte e tre, nell'ordine: è il viaggio che fa ogni pagina PHP. Poi copia l'esempio, provalo sul tuo server e modificalo.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           1. CLIENT E SERVER
+           ================================================================ -->
+      <section>
+        <h2 id="s1">1. Client e server: chi fa cosa</h2>
+
+        <p>Quando scrivi un indirizzo nel browser succedono due cose, sempre nello stesso ordine:</p>
+        <ol>
+          <li>il <strong>client</strong> (il browser, sul tuo computer o sul telefono) manda una <strong>richiesta</strong>: "dammi la pagina <code>/tpsit/ciao.php</code>";</li>
+          <li>il <strong>server</strong> (un programma su un altro computer, o sullo stesso) prepara la pagina e manda una <strong>risposta</strong>.</li>
+        </ol>
+
+        <p>Il programma che riceve le richieste si chiama <strong>server web</strong>. Il più diffuso si chiama <strong>Apache</strong>. Se la pagina richiesta è un file <code>.html</code>, Apache la spedisce così com'è. Se invece è un file <code>.php</code>, Apache non lo spedisce: lo passa all'<strong>interprete PHP</strong>, che esegue il codice e restituisce il risultato. Ad Apache torna indietro solo HTML, ed è <strong>quello</strong> che parte verso il browser.</p>
+
+        <figure class="figura">
+          <svg class="schema" viewBox="0 0 760 300" role="img" aria-labelledby="schema-titolo schema-desc">
+            <title id="schema-titolo">Il viaggio di una pagina PHP</title>
+            <desc id="schema-desc">Il browser manda una richiesta ad Apache. Apache passa il file PHP all'interprete PHP, che lo esegue e restituisce HTML. Apache spedisce al browser solo l'HTML.</desc>
+            <defs>
+              <marker id="punta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" class="schema-punta"/>
+              </marker>
+              <marker id="punta-html" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" class="schema-punta-html"/>
+              </marker>
+            </defs>
+
+            <!-- client -->
+            <rect class="schema-box" x="10" y="80" width="170" height="120" rx="10"/>
+            <text class="schema-titolo" x="95" y="120" text-anchor="middle">Browser</text>
+            <text class="schema-tenue" x="95" y="142" text-anchor="middle">il client</text>
+            <text class="schema-tenue" x="95" y="172" text-anchor="middle">disegna la pagina</text>
+
+            <!-- server: zona tratteggiata con Apache e PHP -->
+            <rect class="schema-zona" x="330" y="20" width="420" height="270" rx="12"/>
+            <text class="schema-tenue" x="540" y="44" text-anchor="middle">SERVER (con XAMPP: il tuo stesso PC)</text>
+            <rect class="schema-box" x="350" y="80" width="150" height="120" rx="10"/>
+            <text class="schema-titolo" x="425" y="125" text-anchor="middle">Apache</text>
+            <text class="schema-tenue" x="425" y="147" text-anchor="middle">server web</text>
+            <rect class="schema-php" x="580" y="80" width="150" height="120" rx="10"/>
+            <text class="schema-titolo" x="655" y="125" text-anchor="middle">PHP</text>
+            <text class="schema-tenue" x="655" y="147" text-anchor="middle">esegue il codice</text>
+
+            <!-- 1: richiesta -->
+            <line class="schema-freccia" x1="180" y1="105" x2="345" y2="105" marker-end="url(#punta)"/>
+            <text x="262" y="78" text-anchor="middle">① richiesta</text>
+            <text class="schema-codice" x="262" y="96" text-anchor="middle" style="font-size:12px">GET /tpsit/ciao.php</text>
+
+            <!-- 2 e 3: Apache e PHP -->
+            <line class="schema-freccia" x1="500" y1="110" x2="575" y2="110" marker-end="url(#punta)"/>
+            <text class="schema-tenue" x="540" y="100" text-anchor="middle">② file .php</text>
+            <line class="schema-freccia-html" x1="580" y1="170" x2="505" y2="170" marker-end="url(#punta-html)"/>
+            <text class="schema-tenue" x="540" y="192" text-anchor="middle">③ HTML</text>
+
+            <!-- 4: risposta -->
+            <line class="schema-freccia-html" x1="350" y1="175" x2="185" y2="175" marker-end="url(#punta-html)"/>
+            <text x="262" y="200" text-anchor="middle">④ risposta</text>
+            <text class="schema-codice" x="262" y="218" text-anchor="middle">solo HTML</text>
+
+            <text class="schema-tenue" x="540" y="250" text-anchor="middle">Il codice PHP resta qui dentro:</text>
+            <text class="schema-tenue" x="540" y="268" text-anchor="middle">non esce mai dal server.</text>
+          </svg>
+          <figcaption>Il viaggio di una pagina PHP. Le frecce blu, più spesse, trasportano solo HTML.</figcaption>
+        </figure>
+
+        <aside class="box box-server">
+          <p>Il browser <strong>non sa niente di PHP</strong>. Non lo sa leggere, non lo sa eseguire, e non lo vede nemmeno: riceve HTML già pronto e lo disegna, esattamente come farebbe con un file <code>.html</code>. Tutto il lavoro del PHP avviene <strong>prima</strong>, sul server.</p>
+        </aside>
+
+        <p>Si dice spesso che la pagina viene <strong>generata</strong> o <strong>renderizzata</strong> dal server. In inglese questo modo di lavorare si chiama <em>server-side rendering</em>: il server "disegna" l'HTML, il browser lo riceve finito.</p>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th></th><th>Pagina statica (<code>.html</code>)</th><th>Pagina dinamica (<code>.php</code>)</th></tr></thead>
+            <tbody>
+              <tr><td>Chi la scrive</td><td>tu, a mano, una volta</td><td>il programma PHP, a ogni richiesta</td></tr>
+              <tr><td>Cosa fa il server</td><td>spedisce il file così com'è</td><td>esegue il PHP e spedisce il risultato</td></tr>
+              <tr><td>Cosa riceve il browser</td><td>HTML</td><td>HTML</td></tr>
+              <tr><td>Può cambiare da sola</td><td>no</td><td>sì: ora, utente, dati di un database…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Guarda la terza riga: in entrambi i casi il browser riceve <strong>HTML</strong>. Dal punto di vista del browser, le due pagine sono indistinguibili.</p>
+      </section>
+
+      <!-- ================================================================
+           2. L'AMBIENTE DI LAVORO
+           ================================================================ -->
+      <section>
+        <h2 id="s2">2. Un server sul tuo PC: XAMPP ed EasyPHP</h2>
+
+        <p>Per provare le pagine PHP serve un server web con PHP. Non serve un computer in più: il server può girare sul <strong>tuo stesso PC</strong>. Il browser e il server saranno due programmi diversi sulla stessa macchina, che si parlano proprio come se fossero lontani.</p>
+
+        <p>Installare e collegare a mano Apache, PHP e un database è lungo. Per questo esistono dei <strong>pacchetti</strong> che li contengono già configurati. In laboratorio ne usiamo due:</p>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Pacchetto</th><th>Cosa contiene</th><th>Come si comanda</th></tr></thead>
+            <tbody>
+              <tr><td><strong>XAMPP</strong></td><td>Apache, PHP, MariaDB (MySQL) e altro</td><td>una finestra, il <strong>Control Panel</strong></td></tr>
+              <tr><td><strong>EasyPHP Devserver</strong></td><td>Apache, PHP, MySQL e altro</td><td>una pagina web, la <strong>Dashboard</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Il database (MySQL) per ora non ci serve: lo useremo nei prossimi moduli. Oggi accendiamo solo <strong>Apache</strong>, che contiene già PHP.</p>
+
+        <aside class="box box-curiosita">
+          <p>Il nome XAMPP è una sigla: <strong>X</strong> sta per "qualsiasi sistema operativo" (esiste per Windows, Linux e macOS), poi <strong>A</strong>pache, <strong>M</strong>ariaDB/MySQL, <strong>P</strong>HP e <strong>P</strong>erl. Un insieme di programmi che lavorano insieme si chiama <strong>stack</strong>.</p>
+        </aside>
+
+        <h3 id="s2-xampp">2.1 XAMPP: il Control Panel</h3>
+
+        <p>Apri <strong>XAMPP Control Panel</strong> dal menu Start. Ogni riga è un <strong>modulo</strong>, cioè un server che puoi accendere e spegnere. All'inizio sono tutti spenti: le colonne <strong>PID(s)</strong> e <strong>Port(s)</strong> sono vuote.</p>
+
+        <figure class="figura">
+          <img src="img/xampp-spento.png" width="668" height="238" alt="XAMPP Control Panel con tutti i moduli spenti: Apache, MySQL, FileZilla, Mercury e Tomcat hanno il pulsante Start e le colonne PID e Port vuote.">
+          <figcaption>
+            XAMPP Control Panel: tutto spento.
+            <span class="crediti">Screenshot: Drstrange85, <a href="https://commons.wikimedia.org/wiki/File:XAMPP_for_Windows_11.png">Wikimedia Commons</a>, CC BY-SA 4.0 (ritagliato).</span>
+          </figcaption>
+        </figure>
+
+        <p>Premi <strong>Start</strong> sulla riga di <strong>Apache</strong>. Dopo qualche secondo:</p>
+        <ul>
+          <li>il nome del modulo diventa <strong>verde</strong>;</li>
+          <li>il pulsante Start diventa <strong>Stop</strong>: è da lì che spegnerai il server;</li>
+          <li>in <strong>PID(s)</strong> compaiono i numeri dei processi di Windows che stanno facendo girare Apache;</li>
+          <li>in <strong>Port(s)</strong> compaiono le <strong>porte</strong> su cui Apache aspetta le richieste: <code>80, 443</code>;</li>
+          <li>nel registro in basso compare <code>Status change detected: running</code>.</li>
+        </ul>
+
+        <figure class="figura">
+          <img src="img/xampp-avviato.png" width="668" height="434" alt="XAMPP Control Panel con Apache e MySQL avviati: i nomi sono evidenziati in verde, i pulsanti dicono Stop, Apache usa le porte 80 e 443, MySQL la porta 3306. Nel registro si legge Status change detected: running.">
+          <figcaption>
+            Apache e MySQL avviati. Guarda la colonna <strong>Port(s)</strong>: Apache usa 80 e 443, MySQL usa 3306.
+            <span class="crediti">Screenshot: VulcanSphere, <a href="https://commons.wikimedia.org/wiki/File:XAMPP_Windows_10.PNG">Wikimedia Commons</a>, GPL.</span>
+          </figcaption>
+        </figure>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Pulsante</th><th>A cosa serve</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Start / Stop</strong></td><td>accende o spegne il modulo</td></tr>
+              <tr><td><strong>Admin</strong></td><td>apre nel browser la pagina di amministrazione (per Apache: <code>http://localhost/dashboard/</code>)</td></tr>
+              <tr><td><strong>Config</strong></td><td>apre i file di configurazione, per esempio <code>httpd.conf</code> di Apache e <code>php.ini</code> di PHP</td></tr>
+              <tr><td><strong>Logs</strong></td><td>apre i registri degli errori</td></tr>
+              <tr><td><strong>Netstat</strong> (a destra)</td><td>mostra quali programmi stanno usando quali porte</td></tr>
+              <tr><td><strong>Quit</strong> (a destra)</td><td>chiude il Control Panel</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="box box-attenzione">
+          <p>Chiudere la finestra con la <strong>X</strong> non spegne i server: il Control Panel si nasconde vicino all'orologio e Apache continua a girare. Per spegnere davvero, premi <strong>Stop</strong> su ogni modulo e poi <strong>Quit</strong>.</p>
+        </aside>
+
+        <h3 id="s2-easyphp">2.2 EasyPHP: la Dashboard</h3>
+
+        <p>EasyPHP Devserver si comanda dal browser. Avvia <strong>EasyPHP Devserver</strong> dal menu Start: compare una piccola icona vicino all'orologio di Windows (se non la vedi, apri la freccia <kbd>^</kbd> delle icone nascoste). Facci clic con il tasto destro e scegli <strong>Open Dashboard</strong>.</p>
+
+        <p>Nella Dashboard ci sono due server: <strong>HTTP SERVER</strong> (cioè Apache) e <strong>DATABASE SERVER</strong> (MySQL). Premi <strong>start</strong> sotto HTTP SERVER.</p>
+
+        <figure class="figura">
+          <img src="img/easyphp-start.png" width="680" height="97" alt="Dashboard di EasyPHP: sotto HTTP SERVER e sotto DATABASE SERVER c'è un pulsante verde start, con accanto un'icona a ingranaggio per le impostazioni.">
+          <figcaption>
+            Dashboard di EasyPHP: i due pulsanti <strong>start</strong>.
+            <span class="crediti">Screenshot: <a href="https://blog.finxter.com/setup-the-easyphp-dashboard/">Finxter, "Setup the EasyPHP Dashboard"</a>.</span>
+          </figcaption>
+        </figure>
+
+        <p>Quando il server è acceso il pulsante diventa <strong>stop</strong>. Con l'ingranaggio accanto apri la pagina del server, dove trovi i dettagli più importanti, a cominciare dalla <strong>porta</strong>:</p>
+
+        <figure class="figura">
+          <img src="img/easyphp-apache.png" width="1024" height="427" loading="lazy" alt="Pagina di Apache nella Dashboard di EasyPHP: il server è acceso (pulsanti restart e stop), la porta scelta è 8080, il Server URL è http://127.0.0.1:8080 e la Document Root è la cartella eds-www dentro EasyPHP-Devserver-17.">
+          <figcaption>
+            Apache in EasyPHP: <strong>Port 8080</strong>, Server URL <code>http://127.0.0.1:8080</code>, Document Root <code>eds-www</code>.
+            <span class="crediti">Screenshot: <a href="https://blog.finxter.com/setup-the-easyphp-dashboard/">Finxter, "Setup the EasyPHP Dashboard"</a>.</span>
+          </figcaption>
+        </figure>
+
+        <figure class="figura">
+          <img src="img/easyphp-mysql.png" width="1024" height="396" loading="lazy" alt="Pagina di MySQL nella Dashboard di EasyPHP: il server è acceso e usa la porta 3306.">
+          <figcaption>
+            MySQL in EasyPHP: porta <strong>3306</strong>, la stessa di XAMPP.
+            <span class="crediti">Screenshot: <a href="https://blog.finxter.com/setup-the-easyphp-dashboard/">Finxter, "Setup the EasyPHP Dashboard"</a>.</span>
+          </figcaption>
+        </figure>
+
+        <p>Confronta con XAMPP: lì Apache usava la porta <strong>80</strong>, qui la <strong>8080</strong>. Che cosa sono queste porte, e perché il numero cambia l'indirizzo da scrivere nel browser? Vediamolo.</p>
+
+        <h3 id="s2-porte">2.3 Le porte</h3>
+
+        <p>Su un computer possono girare tanti server contemporaneamente: un server web, un database, un server di posta… L'<strong>indirizzo IP</strong> dice a quale <strong>computer</strong> va consegnata una richiesta. La <strong>porta</strong> dice a quale <strong>programma</strong>, su quel computer.</p>
+
+        <p>Pensa a un condominio. L'indirizzo IP è la via con il numero civico: porta il postino davanti al palazzo giusto. La porta è il nome sul citofono: decide in quale appartamento arriva la lettera. Un programma che "ascolta" su una porta è come un inquilino che aspetta le lettere a quel citofono.</p>
+
+        <p>Le porte sono numeri da 0 a 65535. Alcuni numeri sono riservati per convenzione a servizi precisi:</p>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Porta</th><th>Servizio</th><th>Dove la incontri</th></tr></thead>
+            <tbody>
+              <tr><td><code>80</code></td><td>HTTP, il web</td><td>Apache in XAMPP</td></tr>
+              <tr><td><code>443</code></td><td>HTTPS, il web cifrato</td><td>Apache in XAMPP</td></tr>
+              <tr><td><code>8080</code></td><td>HTTP "alternativo"</td><td>Apache in EasyPHP; si usa quando la 80 è occupata</td></tr>
+              <tr><td><code>3306</code></td><td>MySQL / MariaDB</td><td>il database, in tutti e due i pacchetti</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>La porta nell'indirizzo</h4>
+
+        <p>La porta si scrive nell'indirizzo, dopo il nome del computer e i due punti. Guarda i pezzi di questo indirizzo:</p>
+
+        <p class="indirizzo" aria-label="http://localhost:8080/tpsit/ciao.php">
+          <span>http://<small>protocollo</small></span>
+          <span>localhost<small>computer</small></span>
+          <span class="indirizzo-porta">:8080<small>porta</small></span>
+          <span>/tpsit/ciao.php<small>percorso del file</small></span>
+        </p>
+
+        <ul>
+          <li><strong><code>localhost</code></strong> è un nome speciale che vuol dire "<strong>questo computer</strong>". Corrisponde all'indirizzo IP <code>127.0.0.1</code>: <code>http://localhost:8080</code> e <code>http://127.0.0.1:8080</code> sono lo stesso indirizzo.</li>
+          <li>Se la porta <strong>non si scrive</strong>, il browser usa quella predefinita: <strong>80</strong> per <code>http://</code>, <strong>443</strong> per <code>https://</code>. Per questo con XAMPP basta <code>http://localhost/</code>, mentre con EasyPHP serve <code>http://127.0.0.1:8080/</code>.</li>
+        </ul>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Apache ascolta sulla porta…</th><th>Nel browser scrivi…</th></tr></thead>
+            <tbody>
+              <tr><td><code>80</code> (XAMPP)</td><td><code>http://localhost/</code> (oppure <code>http://localhost:80/</code>)</td></tr>
+              <tr><td><code>8080</code> (EasyPHP)</td><td><code>http://localhost:8080/</code> (oppure <code>http://127.0.0.1:8080/</code>)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="box box-prova">
+          <p>Con Apache acceso, apri <code>http://localhost/</code> (XAMPP) oppure <code>http://127.0.0.1:8080/</code> (EasyPHP). Poi prova la porta "sbagliata": con XAMPP apri <code>http://localhost:8080/</code>, con EasyPHP <code>http://localhost/</code>. Che messaggio dà il browser? Su quella porta non ascolta nessuno: il citofono suona a vuoto.</p>
+        </aside>
+
+        <h4 id="s2-conflitto">Porta occupata: il problema più comune</h4>
+
+        <p>Su una porta può ascoltare <strong>un solo programma alla volta</strong>. Se la porta 80 è già usata da qualcun altro (un altro server web, un secondo XAMPP aperto, il servizio web di Windows, alcuni programmi di videochiamata o di macchine virtuali), Apache <strong>non parte</strong>. Nel registro di XAMPP compare un messaggio come questo:</p>
+
+        <script type="text/plain" data-codice="testo">
+          Problem detected!
+          Port 80 in use by "Unable to open process" with PID 4!
+          Apache WILL NOT start without the configured ports free!
+          You need to uninstall/disable/reconfigure the blocking application
+          or reconfigure Apache and the Control Panel to listen on a different port
+        </script>
+
+        <p>Il pulsante resta <strong>Start</strong>, il nome non diventa verde e la colonna Port(s) resta vuota. Hai due strade:</p>
+        <ol>
+          <li><strong>liberare la porta</strong>: trova il programma che la occupa (pulsante <strong>Netstat</strong>) e chiudilo;</li>
+          <li><strong>spostare Apache su un'altra porta</strong>, per esempio la 8080. In XAMPP: <strong>Config</strong> sulla riga di Apache → <strong>Apache (httpd.conf)</strong>, poi cambia queste due righe e salva (il file <code>httpd.conf</code> lo vediamo meglio nella <a href="#s2-httpd">sezione 2.5</a>):</li>
+        </ol>
+
+        <script type="text/plain" data-codice="testo">
+          Listen 80                   →   Listen 8080
+          ServerName localhost:80     →   ServerName localhost:8080
+        </script>
+
+        <p>Riavvia Apache: ora in Port(s) leggi <code>8080</code>, e nel browser dovrai scrivere <code>http://localhost:8080/</code>. In EasyPHP è più semplice: la porta si sceglie dal menu <strong>Port</strong> nella pagina di Apache, come nello screenshot di prima.</p>
+
+        <aside class="box box-curiosita">
+          <p>Puoi vedere le porte in uso anche dal Prompt dei comandi di Windows, con <code>netstat -ano | findstr :80</code>. L'ultima colonna è il PID del processo che usa la porta: lo ritrovi nel Task Manager, scheda Dettagli.</p>
+        </aside>
+
+        <aside class="box box-regola">
+          <p><strong>Ricorda</strong>: l'IP sceglie il <strong>computer</strong>, la porta sceglie il <strong>programma</strong>. Se Apache non ascolta sulla porta 80, la porta va scritta nell'indirizzo.</p>
+        </aside>
+
+        <h3 id="s2-cartella">2.4 La DocumentRoot: la cartella pubblicata</h3>
+
+        <p>Apache non pubblica tutto il disco del computer. Pubblica <strong>una sola cartella</strong>, chiamata <strong>DocumentRoot</strong> (la "radice dei documenti"). Tutto ciò che sta lì dentro, comprese le sottocartelle, si può chiedere dal browser. Tutto ciò che sta fuori, per il browser, <strong>non esiste</strong>.</p>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Pacchetto</th><th>DocumentRoot</th><th>Indirizzo della radice</th></tr></thead>
+            <tbody>
+              <tr><td>XAMPP</td><td><code>C:\xampp\htdocs</code></td><td><code>http://localhost/</code></td></tr>
+              <tr><td>EasyPHP Devserver 17</td><td><code>C:\Program Files (x86)\EasyPHP-Devserver-17\eds-www</code></td><td><code>http://127.0.0.1:8080/</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>Dall'indirizzo al file</h4>
+
+        <p>Quando arriva una richiesta, Apache fa un'operazione molto semplice: prende il <strong>percorso</strong> dell'indirizzo (la parte dopo la porta) e lo <strong>attacca in fondo</strong> alla DocumentRoot. Il risultato è il file da leggere sul disco.</p>
+
+        <p class="indirizzo" aria-label="Percorso nell'indirizzo: /tpsit/ciao.php">
+          <span>http://localhost<small>computer e porta</small></span>
+          <span class="indirizzo-porta">/tpsit/ciao.php<small>percorso</small></span>
+        </p>
+        <p class="indirizzo" aria-label="File sul disco: C:\xampp\htdocs\tpsit\ciao.php">
+          <span>C:\xampp\htdocs<small>DocumentRoot</small></span>
+          <span class="indirizzo-porta">\tpsit\ciao.php<small>lo stesso percorso</small></span>
+        </p>
+
+        <p>Le barre <code>/</code> dell'indirizzo diventano le barre <code>\</code> di Windows, ma il percorso è lo stesso. Crea nella DocumentRoot una cartella <code>tpsit</code> per i tuoi esercizi. Ecco come corrispondono file e indirizzi con XAMPP:</p>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>File sul disco</th><th>Indirizzo nel browser</th></tr></thead>
+            <tbody>
+              <tr><td><code>C:\xampp\htdocs\tpsit\ciao.php</code></td><td><code>http://localhost/tpsit/ciao.php</code></td></tr>
+              <tr><td><code>C:\xampp\htdocs\tpsit\es1\primo.php</code></td><td><code>http://localhost/tpsit/es1/primo.php</code></td></tr>
+              <tr><td><code>C:\xampp\htdocs\tpsit\index.php</code></td><td><code>http://localhost/tpsit/</code> (il file <code>index</code> si apre da solo)</td></tr>
+              <tr><td><code>C:\Users\Anna\Desktop\ciao.php</code></td><td>nessuno: è fuori dalla DocumentRoot</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>Tre conseguenze da ricordare</h4>
+
+        <ul>
+          <li><strong>Fuori dalla DocumentRoot non si arriva.</strong> Un file sul Desktop non si può aprire da <code>http://localhost</code>, neanche scrivendo il percorso giusto. È una protezione: sui server veri, accanto alla DocumentRoot si tengono i file che non devono essere scaricabili, come le password del database.</li>
+          <li><strong>Se il file non c'è, la risposta è 404.</strong> Apache funziona, ma attaccando il percorso alla DocumentRoot non trova niente: il browser mostra <strong>Not Found</strong>. Controlla cartella e nome del file.</li>
+          <li><strong>Se chiedi una cartella, Apache cerca un file "indice".</strong> Con <code>http://localhost/tpsit/</code> Apache cerca nella cartella un file <code>index.php</code> o <code>index.html</code> e, se lo trova, lo apre. Se non c'è, in XAMPP mostra l'elenco dei file della cartella.</li>
+        </ul>
+
+        <aside class="box box-attenzione">
+          <p>Nei nomi di file e cartelle evita <strong>spazi, accenti e maiuscole</strong>: scrivi <code>es-1/prima-prova.php</code>, non <code>Es 1/Prima Prova.php</code>. Windows non distingue <code>Ciao.php</code> da <code>ciao.php</code>, ma i server Linux, quelli su cui finiscono quasi tutti i siti veri, sì: un link che funziona sul tuo PC può dare 404 una volta pubblicato.</p>
+        </aside>
+
+        <aside class="box box-prova">
+          <p>Crea in <code>htdocs\tpsit</code> un file di testo <code>prova.txt</code> con dentro una frase, e aprilo da <code>http://localhost/tpsit/prova.txt</code>. Poi sbaglia apposta il nome nell'indirizzo e leggi l'errore. Infine apri <code>http://localhost/tpsit/</code>: che cosa mostra Apache, visto che nella cartella non c'è un <code>index</code>?</p>
+        </aside>
+
+        <aside class="box box-attenzione" data-titolo="⚠ Attenzione: niente doppio clic">
+          <p>Un file <code>.php</code> <strong>non si apre con il doppio clic</strong>. Nella barra degli indirizzi comparirebbe <code>file:///C:/xampp/htdocs/tpsit/ciao.php</code>: il browser leggerebbe il file direttamente dal disco, <strong>senza passare dal server</strong>. Nessuno eseguirebbe il PHP, e vedresti il codice sorgente, una pagina a metà o una finestra di download. L'indirizzo giusto comincia sempre con <code>http://localhost</code>.</p>
+        </aside>
+
+        <h3 id="s2-httpd">2.5 httpd.conf: la configurazione di Apache</h3>
+
+        <p>Porta, DocumentRoot, file indice: chi li decide? Apache li legge all'avvio da un file di testo, <code>httpd.conf</code>. In XAMPP lo apri con <strong>Config</strong> sulla riga di Apache → <strong>Apache (httpd.conf)</strong>; si trova in <code>C:\xampp\apache\conf\httpd.conf</code>. In EasyPHP lo apri con il pulsante <strong>Configuration File</strong> nella pagina di Apache (lo vedi nello screenshot della sezione 2.2).</p>
+
+        <p>Il file è lungo, ma la struttura è semplice: ogni riga è una <strong>direttiva</strong>, cioè un nome seguito da uno o più valori. Le righe che cominciano con <code>#</code> sono commenti. Ecco, semplificate, le righe che ci interessano in XAMPP:</p>
+
+        <script type="text/plain" data-codice="testo">
+          # Porta su cui Apache ascolta
+          Listen 80
+          ServerName localhost:80
+
+          # La cartella pubblicata
+          DocumentRoot "C:/xampp/htdocs"
+          <Directory "C:/xampp/htdocs">
+              Options Indexes FollowSymLinks Includes ExecCGI
+              AllowOverride All
+              Require all granted
+          </Directory>
+
+          # I file "indice", in ordine di preferenza
+          DirectoryIndex index.php index.html index.htm
+        </script>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Direttiva</th><th>Cosa decide</th></tr></thead>
+            <tbody>
+              <tr><td><code>Listen</code></td><td>la <strong>porta</strong> su cui Apache aspetta le richieste</td></tr>
+              <tr><td><code>ServerName</code></td><td>il nome con cui il server si presenta (va tenuto coerente con la porta)</td></tr>
+              <tr><td><code>DocumentRoot</code></td><td>la <strong>cartella pubblicata</strong></td></tr>
+              <tr><td><code>&lt;Directory "…"&gt;</code></td><td>le regole per quella cartella: per esempio <code>Indexes</code> permette l'elenco dei file quando manca l'indice, <code>Require all granted</code> permette l'accesso a tutti</td></tr>
+              <tr><td><code>DirectoryIndex</code></td><td>quali file aprire quando si chiede una cartella, e in che ordine</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Nota che in <code>httpd.conf</code> i percorsi si scrivono con la barra <code>/</code>, anche su Windows.</p>
+
+        <aside class="box box-attenzione">
+          <p>Apache legge <code>httpd.conf</code> <strong>solo all'avvio</strong>: dopo ogni modifica devi fare <strong>Stop</strong> e poi <strong>Start</strong>. Prima di modificarlo, fanne una copia (per esempio <code>httpd.conf.bak</code>): un solo errore di battitura e Apache non parte più. In quel caso, il pulsante <strong>Logs</strong> ti dice in quale riga si trova l'errore.</p>
+        </aside>
+
+        <aside class="box box-curiosita">
+          <p>E chi dice ad Apache di passare i file <code>.php</code> all'interprete PHP? Ancora una direttiva. In XAMPP sta in un file collegato, <code>conf\extra\httpd-xampp.conf</code>: una riga <code>LoadModule php_module …</code> carica PHP dentro Apache, e un blocco <code>&lt;FilesMatch "\.php$"&gt;</code> stabilisce che i file che finiscono in <code>.php</code> vanno eseguiti, non spediti. È il passo ② dello schema della sezione 1. Per questo un file <code>.html</code> con dentro del PHP viene spedito così com'è: non finisce in <code>.php</code>.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           3. IL PRIMO SCRIPT
+           ================================================================ -->
+      <section>
+        <h2 id="s3">3. Il primo script</h2>
+
+        <blockquote class="traccia">
+          <p>Scrivi una pagina PHP che mostri il messaggio "Ciao, mondo!".</p>
+        </blockquote>
+
+        <p>Crea il file <code>ciao.php</code> nella cartella <code>tpsit</code> con un editor di testo (Visual Studio Code, Notepad++ o anche il Blocco note) e scrivi:</p>
+
+        <script type="text/plain" data-php="ciao.php" data-url="http://localhost/tpsit/ciao.php">
+          <?php
+          echo "Ciao, mondo!";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          Ciao, mondo!
+        </script>
+
+        <p>Salva e apri <code>http://localhost/tpsit/ciao.php</code>. Ora guarda le tre schede dell'esempio, una per una. Nella scheda ② non c'è <code>&lt;?php</code>, non c'è <code>echo</code>, non ci sono le virgolette: c'è solo il testo <code>Ciao, mondo!</code>. È tutto ciò che il browser ha ricevuto.</p>
+
+        <h3 id="s3-1">3.1 I tag &lt;?php e ?&gt;</h3>
+
+        <p>Il codice PHP sta sempre tra un <strong>tag di apertura</strong> e un <strong>tag di chiusura</strong>:</p>
+        <ul>
+          <li><code>&lt;?php</code> dice all'interprete: "da qui comincia il codice PHP, eseguilo";</li>
+          <li><code>?&gt;</code> dice: "il codice PHP è finito, da qui torna il testo normale".</li>
+        </ul>
+
+        <p>Nella dispensa i due tag sono evidenziati con uno sfondo colorato, così vedi subito dove passa il confine tra PHP e il resto del file.</p>
+
+        <aside class="box box-attenzione">
+          <p>Tra <code>&lt;?</code> e <code>php</code> <strong>non ci sono spazi</strong>, e dopo <code>&lt;?php</code> ci vuole uno spazio o un a capo. <code>&lt;? php</code> e <code>&lt;?phpecho</code> non funzionano.</p>
+        </aside>
+
+        <h3 id="s3-2">3.2 echo</h3>
+
+        <p><code>echo</code> è l'istruzione che <strong>scrive nella risposta</strong>. Tutto ciò che passi a <code>echo</code> finisce nel testo che il server spedisce al browser, nel punto esatto in cui si trova <code>echo</code>.</p>
+
+        <p>Attenzione a questa frase, perché è il cuore di tutto: <code>echo</code> <strong>non scrive sullo schermo</strong>. Scrive nella risposta, cioè nella scheda ②. Sarà poi il browser a decidere come mostrarla.</p>
+
+        <h3 id="s3-3">3.3 Il punto e virgola</h3>
+
+        <p>Ogni istruzione PHP finisce con il <strong>punto e virgola</strong> <code>;</code>. Si può andare a capo, mettere spazi, scrivere più istruzioni di seguito: conta il punto e virgola. Cosa succede se lo dimentichi lo vediamo nella <a href="#s8">sezione 8</a>.</p>
+
+        <h3 id="s3-4">3.4 Una pagina HTML vera</h3>
+
+        <p><code>ciao.php</code> spediva al browser solo una riga di testo, senza <code>&lt;html&gt;</code>, senza <code>&lt;body&gt;</code>: il browser la mostra lo stesso, ma non è una pagina web fatta bene. Di solito un file PHP è una normale pagina HTML con <strong>dentro</strong> uno o più pezzi di PHP:</p>
+
+        <script type="text/plain" data-php="primo.php" data-url="http://localhost/tpsit/primo.php">
+          <!DOCTYPE html>
+          <html lang="it">
+          <head>
+            <meta charset="UTF-8">
+            <title>La mia prima pagina PHP</title>
+          </head>
+          <body>
+            <h1>Benvenuto!</h1>
+            <p><?php echo "Questo paragrafo l'ha scritto PHP."; ?></p>
+          </body>
+          </html>
+        </script>
+        <script type="text/plain" data-html>
+          <!DOCTYPE html>
+          <html lang="it">
+          <head>
+            <meta charset="UTF-8">
+            <title>La mia prima pagina PHP</title>
+          </head>
+          <body>
+            <h1>Benvenuto!</h1>
+            <p>Questo paragrafo l'ha scritto PHP.</p>
+          </body>
+          </html>
+        </script>
+
+        <p>Confronta la scheda ① con la scheda ②: sono identiche, tranne la riga del paragrafo. Il blocco <code>&lt;?php … ?&gt;</code> è sparito, e al suo posto c'è ciò che ha scritto <code>echo</code>. Tutto il resto, cioè l'HTML fuori dai tag PHP, è arrivato al browser <strong>senza nessuna modifica</strong>.</p>
+
+        <aside class="box box-attenzione">
+          <p>Un file che contiene codice PHP deve avere l'estensione <code>.php</code>. Se lo chiami <code>primo.html</code>, Apache lo spedisce così com'è, senza passarlo all'interprete: il browser riceve il blocco <code>&lt;?php … ?&gt;</code>, non lo capisce e non lo mostra. Il paragrafo resta vuoto.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           4. RENDERIZZATO SUL SERVER
+           ================================================================ -->
+      <section>
+        <h2 id="s4">4. Il server prepara, il browser riceve</h2>
+
+        <p>Finora PHP ha scritto testo che avremmo potuto scrivere a mano. Facciamogli fare qualcosa che l'HTML da solo non sa fare: scrivere l'ora esatta. La funzione <code>date</code> restituisce la data o l'ora del <strong>server</strong>, nel formato che le chiedi: <code>"d/m/Y"</code> vuol dire giorno/mese/anno, <code>"H:i:s"</code> vuol dire ore:minuti:secondi.</p>
+
+        <script type="text/plain" data-php="ora.php" data-url="http://localhost/tpsit/ora.php">
+          <!DOCTYPE html>
+          <html lang="it">
+          <head>
+            <meta charset="UTF-8">
+            <title>Che ore sono?</title>
+          </head>
+          <body>
+            <h1>Orologio del server</h1>
+            <p>Oggi è il <?php echo date("d/m/Y"); ?>.</p>
+            <p>Sul server sono le <?php echo date("H:i:s"); ?>.</p>
+          </body>
+          </html>
+        </script>
+        <script type="text/plain" data-html data-variabile>
+          <!DOCTYPE html>
+          <html lang="it">
+          <head>
+            <meta charset="UTF-8">
+            <title>Che ore sono?</title>
+          </head>
+          <body>
+            <h1>Orologio del server</h1>
+            <p>Oggi è il 26/10/2026.</p>
+            <p>Sul server sono le 10:47:20.</p>
+          </body>
+          </html>
+        </script>
+
+        <aside class="box box-prova">
+          <p>Apri <code>ora.php</code> sul tuo server e aggiorna la pagina più volte con <kbd>F5</kbd>: l'ora cambia. Poi premi <kbd>Ctrl</kbd>+<kbd>U</kbd> (Visualizza sorgente pagina). Cerca <code>date</code>: non c'è. Al suo posto trovi dei numeri. Il browser non ha mai saputo che quei numeri li ha calcolati un programma.</p>
+        </aside>
+
+        <h3 id="s4-1">4.1 Ogni richiesta, una pagina nuova</h3>
+
+        <p>Il file <code>ora.php</code> sul disco non cambia mai. Cambia la <strong>risposta</strong>: ogni volta che premi <kbd>F5</kbd> il browser manda una nuova richiesta, Apache passa di nuovo il file a PHP, PHP lo esegue di nuovo e produce un HTML nuovo, con l'ora di <strong>quel</strong> momento. Tre richieste, tre pagine diverse, un solo file.</p>
+
+        <p>Nota anche che l'ora è quella del <strong>server</strong>, non del tuo computer. Con XAMPP coincidono, perché il server è il tuo PC. Ma se il file fosse su un server in Giappone, vedresti l'ora di Tokyo.</p>
+
+        <h3 id="s4-2">4.2 Quando il browser riceve la pagina, PHP ha già finito</h3>
+
+        <p>Guarda di nuovo l'ordine degli eventi nello <a href="#s1">schema della sezione 1</a>. PHP lavora al passo ②–③; il browser disegna la pagina dopo il passo ④. Le conseguenze sono importanti:</p>
+
+        <ul>
+          <li>quando l'utente vede la pagina, il programma PHP <strong>ha già finito</strong> di girare. Non c'è più niente "acceso" dietro la pagina;</li>
+          <li>l'ora nella pagina <strong>non va avanti da sola</strong>: è un numero scritto nell'HTML. Per vederla cambiare serve una nuova richiesta;</li>
+          <li>PHP non può reagire a un clic o a un tasto premuto nella pagina, perché quando avviene il clic PHP non è più in esecuzione. Per farlo serve una <strong>nuova richiesta</strong> al server (con un link o un modulo) oppure un linguaggio che gira <strong>nel browser</strong>, come JavaScript.</li>
+        </ul>
+
+        <aside class="box box-server">
+          <p>Due mondi separati: <strong>PHP gira sul server</strong>, prima che la pagina parta; <strong>HTML e CSS</strong> (e JavaScript, se c'è) vengono interpretati <strong>dal browser</strong>, dopo che la pagina è arrivata. Tra i due c'è solo la rete, e sulla rete viaggia testo.</p>
+        </aside>
+
+        <h3 id="s4-3">4.3 echo scrive testo, il browser lo interpreta</h3>
+
+        <p>Abbiamo detto che <code>echo</code> scrive nella risposta, non sullo schermo. Ecco una prova. Il simbolo <code>\n</code>, dentro le virgolette doppie, è il carattere "a capo": vediamo cosa succede.</p>
+
+        <script type="text/plain" data-php="a-capo.php" data-url="http://localhost/tpsit/a-capo.php">
+          <?php
+          echo "Prima riga\n";
+          echo "Seconda riga\n";
+          echo "Terza riga<br>\n";
+          echo "Quarta riga";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          Prima riga
+          Seconda riga
+          Terza riga<br>
+          Quarta riga
+        </script>
+
+        <p>Nella scheda ② le righe vanno a capo, come chiesto. Nella scheda ③ le prime tre sono sulla stessa riga! Il motivo: per il browser un a capo nel testo HTML è uno spazio come un altro. Per andare a capo <strong>nella pagina</strong> serve il tag <code>&lt;br&gt;</code>, che è HTML.</p>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Scrivi con echo</th><th>Effetto nell'HTML spedito ②</th><th>Effetto nella pagina ③</th></tr></thead>
+            <tbody>
+              <tr><td><code>"\n"</code></td><td>va a capo</td><td>nessuno (diventa uno spazio)</td></tr>
+              <tr><td><code>"&lt;br&gt;"</code></td><td>compare il tag <code>&lt;br&gt;</code></td><td>va a capo</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="box box-regola">
+          <p><strong>Regola d'oro</strong>: PHP produce <strong>testo</strong>. Per avere una pagina ben fatta, quel testo deve essere <strong>HTML</strong> corretto. Quando un risultato non è come te lo aspetti, guarda prima l'HTML spedito (<kbd>Ctrl</kbd>+<kbd>U</kbd>), poi il PHP.</p>
+        </aside>
+
+        <h3 id="s4-4">4.4 Il PHP non si vede: nemmeno volendo</h3>
+
+        <p>Siccome il codice PHP non lascia mai il server, chi visita il sito <strong>non può leggerlo</strong>, neanche con <kbd>Ctrl</kbd>+<kbd>U</kbd> o con gli strumenti per sviluppatori (<kbd>F12</kbd>). È per questo che nel codice PHP si possono tenere informazioni riservate, come la password per collegarsi al database: restano sul server. Lo vediamo con un esempio nella <a href="#s7">sezione 7</a>.</p>
+
+        <aside class="box box-curiosita">
+          <p>Vale anche al contrario: tutto ciò che <strong>arriva</strong> al browser, l'utente lo può leggere e copiare. HTML, CSS, JavaScript, commenti HTML compresi. Non mettere mai qualcosa di segreto in ciò che viene spedito.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           5. APRIRE E CHIUDERE I BLOCCHI PHP
+           ================================================================ -->
+      <section>
+        <h2 id="s5">5. Aprire e chiudere: HTML e PHP nello stesso file</h2>
+
+        <p>Quando l'interprete PHP legge un file, alterna due modalità:</p>
+        <ul>
+          <li><strong>fuori</strong> dai tag PHP, <strong>copia</strong> il testo nella risposta così com'è, senza guardarlo;</li>
+          <li><strong>dentro</strong> i tag <code>&lt;?php … ?&gt;</code>, <strong>esegue</strong> il codice. Nella risposta finisce solo ciò che il codice scrive con <code>echo</code>.</li>
+        </ul>
+
+        <p>I blocchi PHP in un file possono essere quanti vuoi, lunghi una riga o cento:</p>
+
+        <script type="text/plain" data-php="blocchi.php" data-url="http://localhost/tpsit/blocchi.php">
+          <h1>Tre blocchi PHP</h1>
+          <p>Questo paragrafo è HTML puro: PHP lo copia così com'è.</p>
+          <?php echo "<p>Questo l'ha scritto il primo blocco PHP.</p>"; ?>
+          <p>Di nuovo HTML.</p>
+          <?php
+          echo "<p>Secondo blocco, prima riga.</p>";
+          echo "<p>Secondo blocco, seconda riga.</p>";
+          ?>
+          <p>Fine della pagina, alle <?php echo date("H:i"); ?>.</p>
+        </script>
+        <script type="text/plain" data-html data-variabile>
+          <h1>Tre blocchi PHP</h1>
+          <p>Questo paragrafo è HTML puro: PHP lo copia così com'è.</p>
+          <p>Questo l'ha scritto il primo blocco PHP.</p><p>Di nuovo HTML.</p>
+          <p>Secondo blocco, prima riga.</p><p>Secondo blocco, seconda riga.</p><p>Fine della pagina, alle 10:47.</p>
+        </script>
+
+        <p>Segui il file dall'alto in basso, come fa l'interprete: HTML copiato, blocco eseguito, HTML copiato, blocco eseguito, HTML copiato con dentro un piccolo blocco. La risposta si costruisce <strong>in ordine</strong>, un pezzo dopo l'altro.</p>
+
+        <p>Guarda bene la scheda ②: alcuni paragrafi sono finiti sulla stessa riga. <code>echo</code> scrive esattamente ciò che gli dai, e nelle stringhe non c'è nessun <code>\n</code>. Inoltre PHP "mangia" l'a capo che segue subito <code>?&gt;</code>. Per il browser non cambia niente: nella scheda ③ i paragrafi sono comunque uno sotto l'altro, perché è il tag <code>&lt;p&gt;</code> a mandarli a capo.</p>
+
+        <aside class="box box-attenzione">
+          <p>I blocchi PHP non si possono annidare: <code>&lt;?php … &lt;?php … ?&gt; … ?&gt;</code> è un errore. E ogni <code>&lt;?php</code> va chiuso con il suo <code>?&gt;</code> prima di tornare a scrivere HTML: se dimentichi <code>?&gt;</code>, l'interprete prova a eseguire il tuo HTML come se fosse PHP.</p>
+        </aside>
+
+        <h3 id="s5-1">5.1 File di solo PHP: il ?&gt; finale si omette</h3>
+
+        <p>Se un file contiene <strong>solo</strong> codice PHP, senza HTML, il <code>?&gt;</code> finale si può (e si dovrebbe) togliere. Il motivo: qualunque cosa ci sia dopo <code>?&gt;</code>, anche uno spazio o una riga vuota dimenticata in fondo al file, verrebbe copiata nella risposta. Senza <code>?&gt;</code> il file resta PHP fino alla fine, e il problema non può esistere.</p>
+
+        <script type="text/plain" data-codice="php">
+          <?php
+          echo "Ciao, mondo!";
+          // nessun tag di chiusura: il file finisce qui
+        </script>
+
+        <p>Nelle pagine che mescolano HTML e PHP, invece, ogni blocco va chiuso.</p>
+      </section>
+
+      <!-- ================================================================
+           6. ECHO, STRINGHE E VARIABILI
+           ================================================================ -->
+      <section>
+        <h2 id="s6">6. echo in pratica: stringhe e variabili</h2>
+
+        <h3 id="s6-1">6.1 echo può scrivere tag HTML</h3>
+
+        <p>Per <code>echo</code> un tag HTML è testo come un altro. Lo scrive nella risposta, e sarà il browser a riconoscerlo come tag:</p>
+
+        <script type="text/plain" data-php="titoli.php" data-url="http://localhost/tpsit/titoli.php">
+          <?php
+          echo "<h1>Il mio sito</h1>";
+          echo "<p>Benvenuto nel mio <strong>primo</strong> sito in PHP.</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <h1>Il mio sito</h1><p>Benvenuto nel mio <strong>primo</strong> sito in PHP.</p>
+        </script>
+
+        <h3 id="s6-2">6.2 Le variabili</h3>
+
+        <p>In PHP il nome di ogni variabile comincia con il simbolo <strong>dollaro</strong> <code>$</code>. Il tipo non si dichiara: una variabile nasce la prima volta che le assegni un valore.</p>
+
+        <script type="text/plain" data-codice="php">
+          <?php
+          $nome = "Anna";     // una stringa
+          $anni = 18;         // un numero intero
+          $media = 7.5;       // un numero con la virgola
+          ?>
+        </script>
+
+        <aside class="box box-attenzione">
+          <p>I nomi delle variabili distinguono maiuscole e minuscole: <code>$nome</code> e <code>$Nome</code> sono due variabili diverse. Il <code>$</code> fa parte del nome e non si può dimenticare: <code>nome = "Anna";</code> è un errore.</p>
+        </aside>
+
+        <h3 id="s6-3">6.3 Virgolette doppie e virgolette singole</h3>
+
+        <p>Le stringhe si scrivono tra virgolette, doppie <code>"…"</code> o singole <code>'…'</code>. La differenza è importante:</p>
+        <ul>
+          <li>tra virgolette <strong>doppie</strong>, PHP sostituisce le variabili con il loro valore e riconosce i simboli speciali come <code>\n</code>;</li>
+          <li>tra virgolette <strong>singole</strong>, il testo resta esattamente com'è scritto.</li>
+        </ul>
+
+        <p>Per "incollare" due stringhe si usa l'operatore <strong>punto</strong> <code>.</code>, che si chiama <strong>concatenazione</strong>.</p>
+
+        <script type="text/plain" data-php="variabili.php" data-url="http://localhost/tpsit/variabili.php">
+          <?php
+          $nome = "Anna";
+          $anni = 18;
+
+          echo "<p>Mi chiamo $nome e ho $anni anni.</p>";
+          echo '<p>Mi chiamo $nome e ho $anni anni.</p>';
+          echo "<p>Il prossimo anno avrò " . ($anni + 1) . " anni.</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <p>Mi chiamo Anna e ho 18 anni.</p><p>Mi chiamo $nome e ho $anni anni.</p><p>Il prossimo anno avrò 19 anni.</p>
+        </script>
+
+        <p>Nella scheda ② il <code>$nome</code> della seconda riga è arrivato al browser come testo: tra virgolette singole PHP non l'ha sostituito. Le variabili, invece, non arrivano mai al browser: arriva solo il loro <strong>valore</strong>, già inserito nel testo.</p>
+
+        <aside class="box box-attenzione">
+          <p>In PHP il <code>+</code> serve <strong>solo</strong> per le somme tra numeri. Per unire due stringhe si usa il <strong>punto</strong>: <code>"Ciao " . $nome</code>.</p>
+        </aside>
+
+        <h3 id="s6-4">6.4 Virgolette dentro le virgolette</h3>
+
+        <p>Gli attributi HTML hanno le virgolette: <code>&lt;a href="…"&gt;</code>. Se la stringa di <code>echo</code> è anche lei tra virgolette doppie, c'è un conflitto:</p>
+
+        <script type="text/plain" data-codice="php">
+          <?php
+          echo "<a href="https://www.php.net">Manuale di PHP</a>";   // ERRORE
+          ?>
+        </script>
+
+        <p>Per PHP la stringa finisce alla seconda <code>"</code>, subito dopo <code>href=</code>, e quello che segue non ha senso: è un errore di sintassi. Le soluzioni sono due: usare apici singoli per l'attributo HTML (va bene anche per il browser), oppure usare apici singoli per la stringa PHP.</p>
+
+        <script type="text/plain" data-php="virgolette.php" data-url="http://localhost/tpsit/virgolette.php">
+          <?php
+          $sito = "https://www.php.net";
+
+          echo "<a href='$sito'>Manuale di PHP</a>";
+          echo "<br>";
+          echo '<a href="' . $sito . '">Manuale di PHP</a>';
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <a href='https://www.php.net'>Manuale di PHP</a><br><a href="https://www.php.net">Manuale di PHP</a>
+        </script>
+
+        <aside class="box box-curiosita">
+          <p>Esiste anche una terza soluzione: il carattere di escape <code>\"</code>, che dentro una stringa tra virgolette doppie vuol dire "questa virgoletta fa parte del testo": <code>echo "&lt;a href=\"$sito\"&gt;…&lt;/a&gt;";</code>. Funziona, ma con tante virgolette diventa difficile da leggere.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           7. COMMENTI
+           ================================================================ -->
+      <section>
+        <h2 id="s7">7. Commenti: chi resta e chi parte</h2>
+
+        <p>In PHP ci sono due tipi di commento: <code>//</code> per una riga sola (funziona anche <code>#</code>) e <code>/* … */</code> per più righe. Nell'HTML il commento si scrive <code>&lt;!-- … --&gt;</code>. Dove finiscono, questi commenti?</p>
+
+        <script type="text/plain" data-php="commenti.php" data-url="http://localhost/tpsit/commenti.php">
+          <?php
+          // La password la conosce solo il server
+          $password = "Pitagora2026";
+
+          /* Anche questo commento
+             resta sul server. */
+          ?>
+          <!-- Questo commento HTML, invece, arriva al browser! -->
+          <h1>Area riservata</h1>
+          <p>Inserisci la password per entrare.</p>
+        </script>
+        <script type="text/plain" data-html>
+          <!-- Questo commento HTML, invece, arriva al browser! -->
+          <h1>Area riservata</h1>
+          <p>Inserisci la password per entrare.</p>
+        </script>
+
+        <ul>
+          <li>I commenti PHP e la variabile <code>$password</code> sono <strong>spariti</strong>: erano dentro il blocco PHP, sono rimasti sul server.</li>
+          <li>Il commento HTML è <strong>arrivato al browser</strong>: per PHP è testo fuori dai tag, da copiare così com'è. Nella pagina (scheda ③) non si vede, ma con <kbd>Ctrl</kbd>+<kbd>U</kbd> chiunque lo legge.</li>
+        </ul>
+
+        <aside class="box box-server">
+          <p>Il commento PHP è un appunto per chi lavora sul server. Il commento HTML è un appunto <strong>spedito</strong> a ogni visitatore. Se un'informazione non deve uscire, mettila in un commento PHP, mai in uno HTML.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           8. ERRORI
+           ================================================================ -->
+      <section>
+        <h2 id="s8">8. Quando qualcosa va storto</h2>
+
+        <p>Proviamo a dimenticare un punto e virgola, alla fine della prima riga di <code>echo</code>:</p>
+
+        <script type="text/plain" data-php="errore.php" data-url="http://localhost/tpsit/errore.php">
+          <h1>Una pagina con un errore</h1>
+          <?php
+          echo "<p>Prima riga</p>"
+          echo "<p>Seconda riga</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <br />
+          <b>Parse error</b>:  syntax error, unexpected token &quot;echo&quot;, expecting &quot;,&quot; or &quot;;&quot; in <b>C:\xampp\htdocs\tpsit\errore.php</b> on line <b>4</b><br />
+        </script>
+
+        <p>Leggiamo il messaggio pezzo per pezzo:</p>
+        <ul>
+          <li><strong>Parse error</strong>: errore di sintassi. L'interprete non è riuscito nemmeno a "leggere" il codice;</li>
+          <li><strong>unexpected token "echo", expecting "," or ";"</strong>: ha trovato un <code>echo</code> dove si aspettava una virgola o un punto e virgola;</li>
+          <li><strong>on line 4</strong>: se ne è accorto alla riga 4. Ma il punto e virgola manca alla riga 3! L'errore si trova spesso <strong>alla riga indicata o in quella prima</strong>.</li>
+        </ul>
+
+        <p>Il testo esatto dipende dalla versione di PHP: con versioni più vecchie, come quella di EasyPHP, leggerai per esempio <code>unexpected 'echo' (T_ECHO)</code>. Il senso è lo stesso.</p>
+
+        <p>Guarda anche cosa <strong>manca</strong> nella scheda ②: il titolo <code>&lt;h1&gt;</code>, che era HTML corretto, non è arrivato. Con un errore di sintassi PHP non esegue <strong>niente</strong> del file: spedisce soltanto il messaggio di errore. E il messaggio stesso è… HTML, con i tag <code>&lt;b&gt;</code> e <code>&lt;br&gt;</code>, perché è l'unica cosa che il browser sa mostrare.</p>
+
+        <aside class="box box-attenzione">
+          <p>XAMPP ed EasyPHP sono pensati per chi sviluppa, e mostrano gli errori nella pagina. Su un sito vero questa opzione (<code>display_errors</code> nel file <code>php.ini</code>) va <strong>spenta</strong>: il messaggio rivela a tutti il percorso dei file sul server e dettagli del codice. Gli errori si scrivono invece in un file di registro, che legge solo chi gestisce il server.</p>
+        </aside>
+
+        <h3 id="s8-1">8.1 Se la pagina non funziona</h3>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Cosa vedi</th><th>Causa probabile</th></tr></thead>
+            <tbody>
+              <tr><td>Il codice PHP scritto nella pagina, o una finestra di download</td><td>hai aperto il file con il doppio clic (<code>file:///…</code>) invece che da <code>http://localhost/…</code></td></tr>
+              <tr><td>"Impossibile raggiungere il sito" / "connessione rifiutata"</td><td>Apache è spento, oppure stai usando la porta sbagliata</td></tr>
+              <tr><td>"Not Found" (errore 404)</td><td>Apache funziona, ma il file non è nella cartella giusta o il nome è scritto male</td></tr>
+              <tr><td><strong>Parse error</strong></td><td>errore di sintassi: controlla la riga indicata e quella prima</td></tr>
+              <tr><td>Il pezzo scritto da PHP non compare, il resto sì</td><td>il file ha estensione <code>.html</code> invece di <code>.php</code></td></tr>
+              <tr><td>Apache non parte</td><td>la porta 80 è occupata: vedi la <a href="#s2-conflitto">sezione 2.3</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           9. RIEPILOGO ED ESERCIZI
+           ================================================================ -->
+      <section>
+        <h2 id="s9">9. Riepilogo ed esercizi</h2>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Concetto</th><th>In una frase</th></tr></thead>
+            <tbody>
+              <tr><td>client e server</td><td>il browser chiede, il server risponde</td></tr>
+              <tr><td>server-side rendering</td><td>il server esegue il PHP e spedisce al browser solo HTML</td></tr>
+              <tr><td>porta</td><td>sceglie il programma sul computer: 80 per HTTP, 443 per HTTPS, 3306 per MySQL</td></tr>
+              <tr><td><code>localhost</code></td><td>"questo computer", cioè <code>127.0.0.1</code></td></tr>
+              <tr><td>DocumentRoot</td><td>l'unica cartella pubblicata: <code>C:\xampp\htdocs</code> in XAMPP, <code>eds-www</code> in EasyPHP; il percorso dell'indirizzo si attacca in fondo</td></tr>
+              <tr><td><code>httpd.conf</code></td><td>la configurazione di Apache: <code>Listen</code>, <code>DocumentRoot</code>, <code>DirectoryIndex</code>; dopo una modifica, riavviare</td></tr>
+              <tr><td><code>&lt;?php … ?&gt;</code></td><td>il codice dentro viene eseguito, il testo fuori viene copiato</td></tr>
+              <tr><td><code>echo</code></td><td>scrive nella risposta, non sullo schermo</td></tr>
+              <tr><td><code>$variabile</code></td><td>al browser arriva solo il suo valore</td></tr>
+              <tr><td><code>"…"</code> e <code>'…'</code></td><td>le doppie sostituiscono le variabili, le singole no</td></tr>
+              <tr><td><code>.</code></td><td>concatena due stringhe</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 1. Il server parte?">
+          <p>Avvia Apache con XAMPP oppure con EasyPHP. Annota su quale porta ascolta e scrivi l'indirizzo esatto che devi usare nel browser per aprire la radice del server. Poi spegni Apache e ricarica la pagina: che cosa cambia?</p>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 2. Leggi httpd.conf">
+          <p>Apri <code>httpd.conf</code> del tuo server, senza modificarlo, e cerca (con <kbd>Ctrl</kbd>+<kbd>F</kbd>) le direttive <code>Listen</code>, <code>DocumentRoot</code> e <code>DirectoryIndex</code>. Annota i loro valori. Poi rispondi: se nella cartella <code>tpsit</code> ci fossero sia <code>index.html</code> sia <code>index.php</code>, quale aprirebbe Apache con <code>http://localhost/tpsit/</code>?</p>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 3. Biglietto da visita">
+          <p>Crea <code>biglietto.php</code>: una pagina HTML completa in cui, con <code>echo</code>, scrivi il tuo nome in un <code>&lt;h1&gt;</code> e classe e scuola in due paragrafi. Prima salva nome, classe e scuola in tre variabili. Poi controlla con <kbd>Ctrl</kbd>+<kbd>U</kbd> che l'HTML spedito sia corretto.</p>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 4. Prevedi la risposta">
+          <p>Senza usare il computer, scrivi su un foglio l'HTML esatto che il server spedisce al browser per questo file. Poi verifica sul tuo server con <kbd>Ctrl</kbd>+<kbd>U</kbd>.</p>
+          <script type="text/plain" data-codice="php">
+            <?php $materia = "TPSIT"; ?>
+            <!-- compito di <?php echo $materia; ?> -->
+            <h2>Compito di <?php echo $materia; ?></h2>
+            <?php
+            // da consegnare entro venerdì
+            echo '<p>Materia: $materia</p>';
+            echo "<p>Ore: " . (3 + 1) . "</p>";
+            ?>
+          </script>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 5. Caccia agli errori">
+          <p>Questo file contiene quattro errori. Trovali, correggili e verifica che la pagina funzioni.</p>
+          <script type="text/plain" data-codice="php">
+            <h1>Benvenuti</h1>
+            <? php
+            nome = "Luca";
+            echo "<p>Ciao " + $nome + "</p>"
+            ?>
+          </script>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 6. Buongiorno o buonasera?">
+          <p>Crea <code>saluto.php</code>, che mostri la data di oggi e l'ora del server in un paragrafo, con la frase "Pagina generata il … alle …". Aggiorna la pagina più volte e ogni volta guarda il sorgente con <kbd>Ctrl</kbd>+<kbd>U</kbd>. Poi rispondi: se lasci la pagina aperta per dieci minuti senza aggiornarla, l'ora scritta cambia? Perché?</p>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 7. Cambia porta">
+          <p>Sposta Apache dalla porta 80 alla porta 8081 (in XAMPP con <code>httpd.conf</code>; in EasyPHP scegli dal menu Port una porta diversa da quella attuale). Riavvialo e apri il tuo <code>biglietto.php</code>. Quale indirizzo hai usato? Che cosa succede se ometti la porta?</p>
+        </aside>
+      </section>
+
+      <nav class="nav-moduli" data-navigazione-moduli aria-label="Altri moduli"></nav>
+    </main>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,392 @@
+/* ==========================================================================
+   dispensa.css — layout comune a tutte le dispense
+   Contiene: indice laterale (fisso su desktop, a scomparsa su mobile),
+   area dei contenuti, componente "esempio PHP", figure, richiami agli
+   strumenti, navigazione tra moduli, regole di stampa delle dispense.
+   Va incluso DOPO base.css.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Struttura della pagina
+   -------------------------------------------------------------------------- */
+.dispensa {
+  display: grid;
+  grid-template-columns: 1fr;
+  max-width: 82rem;
+  margin: 0 auto;
+}
+
+.dispensa-contenuto {
+  min-width: 0;          /* permette alle tabelle di scorrere dentro il loro box */
+  max-width: 48rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+.dispensa-intestazione { margin-bottom: 2rem; }
+.dispensa-intestazione h1 { margin-bottom: 0.3em; }
+
+.dispensa-contenuto section { margin-bottom: 2.5rem; }
+.dispensa-contenuto h2 {
+  padding-top: 0.5rem;
+  border-top: 2px solid var(--bordo);
+}
+
+/* --------------------------------------------------------------------------
+   2. Indice laterale
+   -------------------------------------------------------------------------- */
+.indice-apri { display: inline-flex; flex-shrink: 0; }
+
+.dispensa-indice {
+  position: fixed;
+  top: var(--altezza-barra);
+  bottom: 0;
+  left: 0;
+  z-index: 40;
+  width: min(20rem, 85vw);
+  padding: 1rem 0.75rem 2rem;
+  overflow-y: auto;
+  background: var(--superficie);
+  border-right: 1px solid var(--bordo);
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.15);
+  transform: translateX(-105%);
+  transition: transform 0.2s ease;
+  visibility: hidden;
+}
+.dispensa-indice.aperto { transform: none; visibility: visible; }
+
+.indice-titolo {
+  margin: 0 0 0.5rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--testo-tenue);
+}
+.dispensa-indice ol { list-style: none; margin: 0; padding: 0; }
+.dispensa-indice ol ol { padding-left: 0.9rem; margin-bottom: 0.3rem; }
+.dispensa-indice li { margin: 0; }
+.dispensa-indice a {
+  display: block;
+  padding: 0.25rem 0.5rem;
+  border-left: 3px solid transparent;
+  border-radius: 0 4px 4px 0;
+  color: var(--testo);
+  text-decoration: none;
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+.dispensa-indice ol ol a { font-size: 0.85rem; color: var(--testo-tenue); }
+.dispensa-indice a:hover { background: var(--sfondo-alt); }
+/* sezione corrente: bordo, sfondo e grassetto (non solo colore) */
+.dispensa-indice a.corrente {
+  border-left-color: var(--accento);
+  background: var(--accento-tenue);
+  color: var(--testo);
+  font-weight: 700;
+}
+
+.velo-indice {
+  position: fixed;
+  inset: var(--altezza-barra) 0 0 0;
+  z-index: 35;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+@media (min-width: 64rem) {
+  .dispensa { grid-template-columns: 17rem minmax(0, 1fr); }
+  .indice-apri, .velo-indice { display: none !important; }
+  .dispensa-indice {
+    position: sticky;
+    top: var(--altezza-barra);
+    align-self: start;
+    height: calc(100vh - var(--altezza-barra));
+    width: auto;
+    transform: none;
+    visibility: visible;
+    box-shadow: none;
+    background: transparent;
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. Componente "esempio PHP": tre schede server → rete → browser
+      Generato da codice.js a partire da un blocco data-php + data-html.
+   -------------------------------------------------------------------------- */
+.esempio-php {
+  margin: 1.2rem 0 1.8rem;
+  border: 1px solid var(--bordo);
+  border-left: 4px solid var(--accento);
+  border-radius: var(--raggio);
+  background: var(--superficie);
+  overflow: hidden;
+}
+
+.esempio-testata {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.8rem;
+  background: var(--sfondo-alt);
+  border-bottom: 1px solid var(--bordo);
+}
+.esempio-file {
+  font-family: var(--font-codice);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.esempio-file::before { content: "📄 "; }
+.esempio-stato { margin-left: auto; font-size: 0.85rem; color: var(--testo-tenue); }
+.esempio-testata .pulsante { font-size: 0.8rem; padding: 0.3em 0.7em; }
+
+/* le tre schede, separate da frecce: il percorso del file */
+.esempio-schede {
+  display: flex;
+  align-items: stretch;
+  gap: 0.25rem;
+  padding: 0.5rem 0.6rem 0;
+  border-bottom: 1px solid var(--bordo);
+  overflow-x: auto;
+}
+.esempio-freccia {
+  align-self: center;
+  padding-bottom: 0.4rem;
+  font-weight: 700;
+  color: var(--testo-tenue);
+}
+.esempio-scheda {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex: 1 1 0;
+  min-width: 8.5rem;
+  padding: 0.45rem 0.6rem 0.55rem;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  background: none;
+  color: var(--testo-tenue);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+}
+.esempio-scheda:hover { background: var(--sfondo-alt); color: var(--testo); }
+/* scheda attiva: bordo, sfondo, grassetto e linea spessa (non solo colore) */
+.esempio-scheda[aria-selected="true"] {
+  border-color: var(--bordo);
+  background: var(--accento-tenue);
+  color: var(--testo);
+}
+.esempio-scheda[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 4px;
+  background: var(--accento);
+}
+.esempio-scheda-numero { font-size: 1.3rem; line-height: 1; }
+.esempio-scheda-testi { display: flex; flex-direction: column; line-height: 1.2; }
+.esempio-scheda-testi strong { font-size: 0.88rem; }
+.esempio-scheda-testi small { font-size: 0.75rem; }
+.esempio-scheda[aria-selected="true"] .esempio-scheda-testi small { color: var(--testo-tenue); }
+
+.esempio-pannello { padding: 0.7rem 0.8rem 0.2rem; }
+.esempio-pannello pre.codice { margin-top: 0.5rem; }
+.esempio-nota { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--testo-tenue); }
+.esempio-titolo-stampa { display: none; }
+
+/* la finta finestra del browser della scheda ③ */
+.esempio-browser {
+  margin: 0.3rem 0 0.9rem;
+  border: 1px solid var(--bordo);
+  border-radius: var(--raggio);
+  overflow: hidden;
+}
+.esempio-browser-barra {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 0.6rem;
+  background: var(--sfondo-alt);
+  border-bottom: 1px solid var(--bordo);
+}
+.esempio-browser-pallini { font-size: 0.6rem; letter-spacing: 0.1em; color: var(--testo-tenue); }
+.esempio-browser-url {
+  flex: 1;
+  min-width: 0;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--bordo);
+  border-radius: 999px;
+  background: var(--superficie);
+  font-family: var(--font-codice);
+  font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.esempio-browser-pagina { background: #fff; }
+.esempio-iframe {
+  display: block;
+  width: 100%;
+  height: 140px;
+  border: 0;
+  background: #fff;
+}
+
+/* scheda ⓪: le coppie chiave → valore che PHP trova in $_GET / $_POST */
+.coppie { margin: 0.6rem 0 0.9rem; }
+.coppie-titolo { margin: 0 0 0.3rem; font-size: 0.9rem; font-weight: 700; }
+.coppie .tabella { margin: 0; }
+.coppie td, .coppie th { vertical-align: middle; }
+.coppie-freccia { width: 1.5rem; padding-left: 0 !important; padding-right: 0 !important; text-align: center !important; font-weight: 700; color: var(--testo-tenue); }
+/* chiave e valore: due stili diversi, distinti anche dal bordo, non solo dal colore */
+code.coppie-chiave { color: var(--tk-proprieta); border-style: solid; border-width: 1px 1px 1px 4px; font-weight: 700; }
+code.coppie-valore { color: var(--tk-stringa); border-style: dashed; }
+
+@media (max-width: 40rem) {
+  .esempio-scheda { min-width: 7rem; }
+  .esempio-scheda-testi small { display: none; }
+}
+
+/* --------------------------------------------------------------------------
+   3b. Figure (screenshot e schemi) con didascalia e crediti
+       Uso: <figure class="figura"><img ...><figcaption>...</figcaption></figure>
+   -------------------------------------------------------------------------- */
+.figura { margin: 1.3rem 0 1.6rem; }
+.figura img, .figura svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--bordo);
+  border-radius: var(--raggio);
+  background: #fff;
+}
+.figura svg { border: 0; background: none; }
+.figura figcaption {
+  margin-top: 0.45rem;
+  font-size: 0.9rem;
+  color: var(--testo-tenue);
+  text-align: center;
+}
+.figura .crediti { display: block; font-size: 0.75rem; margin-top: 0.15rem; }
+.figura-coppia {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 48rem) {
+  .figura-coppia { grid-template-columns: 1fr 1fr; align-items: start; }
+}
+
+/* --------------------------------------------------------------------------
+   3c. Anatomia di un indirizzo: ogni pezzo con bordo ed etichetta
+       Uso: <p class="indirizzo"><span>http://<small>protocollo</small></span>...</p>
+       .indirizzo-porta evidenzia il pezzo di cui si sta parlando
+   -------------------------------------------------------------------------- */
+.indirizzo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem;
+  margin: 1rem 0 1.4rem;
+  font-family: var(--font-codice);
+  font-size: 1rem;
+}
+.indirizzo span {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid var(--bordo);
+  border-bottom: 3px solid var(--accento);
+  border-radius: 4px;
+  background: var(--superficie);
+}
+.indirizzo small {
+  font-family: var(--font-testo);
+  font-size: 0.72rem;
+  color: var(--testo-tenue);
+}
+.indirizzo .indirizzo-porta { border-bottom-color: var(--avviso); border-bottom-style: double; border-bottom-width: 4px; font-weight: 700; }
+
+/* --------------------------------------------------------------------------
+   4. Richiamo a uno strumento (ben visibile)
+      Uso: <a class="richiamo" href="..."><strong>Titolo</strong> testo</a>
+   -------------------------------------------------------------------------- */
+.richiamo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.6rem 0;
+  padding: 1rem 1.2rem;
+  border: 2px solid var(--accento);
+  border-radius: var(--raggio);
+  background: var(--accento-tenue);
+  color: var(--testo);
+  text-decoration: none;
+  box-shadow: var(--ombra);
+}
+.richiamo:hover { border-width: 3px; padding: calc(1rem - 1px) calc(1.2rem - 1px); }
+.richiamo-icona { font-size: 2rem; line-height: 1; flex-shrink: 0; }
+.richiamo strong { display: block; font-size: 1.1rem; color: var(--accento); }
+.richiamo-freccia { margin-left: auto; font-size: 1.5rem; color: var(--accento); flex-shrink: 0; }
+
+/* --------------------------------------------------------------------------
+   5. Navigazione tra moduli
+   -------------------------------------------------------------------------- */
+.nav-moduli {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--bordo);
+}
+.nav-modulo {
+  flex: 1 1 14rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--bordo);
+  border-radius: var(--raggio);
+  background: var(--superficie);
+}
+.nav-modulo-succ { text-align: right; margin-left: auto; }
+.nav-modulo-etichetta {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--testo-tenue);
+}
+
+/* --------------------------------------------------------------------------
+   6. Stampa delle dispense
+      - niente indice, pulsanti, anteprime e output
+      - il codice degli esempi si stampa come testo (il <pre> colorato)
+      - i blocchi di codice non vengono spezzati tra due pagine
+   -------------------------------------------------------------------------- */
+@media print {
+  .dispensa { display: block; max-width: none; }
+  .dispensa-indice, .velo-indice, .indice-apri, .nav-moduli,
+  .esempio-schede, .esempio-testata .pulsante, .esempio-nota { display: none !important; }
+
+  .dispensa-contenuto { max-width: none; padding: 0; }
+  .dispensa-contenuto h2 { border-top: 0; }
+  section { break-inside: auto; }
+
+  /* in stampa le schede ① e ② si vedono una sotto l'altra; la ③ no */
+  .esempio-php { border: 1px solid #999; border-left: 3px solid #000; break-inside: avoid; }
+  .esempio-testata { background: none; }
+  .esempio-pannello[hidden] { display: block !important; }
+  .esempio-pannello:last-child { display: none !important; }
+  .esempio-titolo-stampa { display: block; margin: 0.3rem 0 0; font-size: 9pt; font-weight: 700; }
+
+  pre.codice { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 9.5pt; overflow: visible; }
+  .tk-php-tag { background: none !important; border: 1px solid #000; }
+
+  .figura img { max-width: 75%; }
+  .richiamo { box-shadow: none; border: 1px solid #000; background: none; }
+  .richiamo::after { content: " (" attr(href) ")"; font-size: 9pt; }
+}

@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dati dal browser: GET, POST e superglobali · TPSIT 5° anno</title>
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/dispensa.css">
+  <script src="../../assets/js/tema.js"></script>
+  <script src="../../corso.js" defer></script>
+  <script src="../../assets/js/corso-ui.js" defer></script>
+  <script src="../../assets/js/dispensa.js" defer></script>
+  <script src="../../assets/js/codice.js" defer></script>
+</head>
+<body data-radice="../../" data-modulo="02-superglobali">
+
+  <header class="barra">
+    <button type="button" class="pulsante indice-apri" aria-controls="indice" aria-expanded="false">☰ Indice</button>
+    <a class="barra-home" href="../../index.html">← Home <span class="testo-lungo">del corso</span></a>
+    <span class="barra-titolo">Dati dal browser: GET, POST e superglobali</span>
+    <button type="button" class="pulsante tema-interruttore" data-tema-interruttore>☾ Scuro</button>
+  </header>
+
+  <div class="dispensa">
+    <nav class="dispensa-indice" id="indice" aria-label="Indice della dispensa">
+      <p class="indice-titolo">Indice</p>
+      <ol data-indice></ol>
+    </nav>
+
+    <main class="dispensa-contenuto">
+      <header class="dispensa-intestazione">
+        <p class="scheda-numero">Modulo 02</p>
+        <h1>Dati dal browser: GET, POST e superglobali</h1>
+        <p class="sottotitolo">Come arrivano al server i dati dell'utente, e dove li trova PHP: in coppie chiave → valore.</p>
+      </header>
+
+      <!-- ================================================================
+           INTRODUZIONE
+           ================================================================ -->
+      <section>
+        <h2 id="introduzione">Introduzione</h2>
+
+        <p>Nel modulo 01 il server preparava la pagina e la spediva. Ma il browser, nella richiesta, chiedeva solo "dammi questo file": non diceva <strong>niente</strong> dell'utente. Nessun nome, nessuna scelta, nessuna password. Per costruire una pagina su misura, il server ha bisogno di <strong>ricevere dati</strong>.</p>
+
+        <p>In questa dispensa vediamo:</p>
+        <ol>
+          <li>che cos'è una <strong>coppia chiave → valore</strong>, il formato in cui viaggiano e arrivano tutti i dati;</li>
+          <li>che cosa sono gli <strong>array superglobali</strong>, dove PHP mette i dati della richiesta;</li>
+          <li>come mandare dati <strong>nell'indirizzo</strong>, con il metodo <strong>GET</strong>, e leggerli con <code>$_GET</code>;</li>
+          <li>come mandarli con un <strong>modulo</strong> e con il metodo <strong>POST</strong>, e leggerli con <code>$_POST</code>;</li>
+          <li>come capire con quale metodo è arrivata una richiesta, con <code>$_SERVER["REQUEST_METHOD"]</code>.</li>
+        </ol>
+
+        <aside class="box box-regola">
+          <p><strong>Una scheda in più</strong>: da qui in avanti molti esempi cominciano dalla scheda <strong>⓪ La richiesta</strong>. Mostra che cosa spedisce il browser e quali coppie chiave → valore trova PHP <strong>prima</strong> di eseguire il tuo codice. Poi seguono le solite ① Sul server, ② Spedito al browser, ③ Nel browser.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           1. CHIAVE → VALORE
+           ================================================================ -->
+      <section>
+        <h2 id="s1">1. Coppie chiave → valore</h2>
+
+        <p>Pensa a un modulo di carta, per esempio l'iscrizione a un torneo. Ogni riga ha un'<strong>etichetta</strong> stampata e uno spazio da <strong>riempire</strong>:</p>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Etichetta (chiave)</th><th class="coppie-freccia">→</th><th>Cosa hai scritto (valore)</th></tr></thead>
+            <tbody>
+              <tr><td><code class="coppie-chiave">nome</code></td><td class="coppie-freccia">→</td><td><code class="coppie-valore">Anna</code></td></tr>
+              <tr><td><code class="coppie-chiave">classe</code></td><td class="coppie-freccia">→</td><td><code class="coppie-valore">5A</code></td></tr>
+              <tr><td><code class="coppie-chiave">eta</code></td><td class="coppie-freccia">→</td><td><code class="coppie-valore">18</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Ogni riga è una <strong>coppia</strong>: una <strong>chiave</strong> (il nome del dato) e il suo <strong>valore</strong>. Per trovare un dato non conti le righe: cerchi l'<strong>etichetta</strong>. "Quanti anni ha?" Cerchi <code>eta</code> e leggi <code>18</code>. È così che il browser manda i dati al server, ed è così che PHP te li consegna.</p>
+
+        <h3 id="s1-1">1.1 Le coppie in PHP</h3>
+
+        <p>In PHP un insieme di coppie si scrive tra parentesi quadre. Ogni coppia è <code>chiave =&gt; valore</code>, e le coppie sono separate da virgole. Per leggere un valore scrivi il nome della variabile e, tra parentesi quadre, la <strong>chiave</strong>:</p>
+
+        <script type="text/plain" data-php="studente.php" data-url="http://localhost/tpsit/studente.php">
+          <?php
+          $studente = [
+              "nome" => "Anna",
+              "classe" => "5A",
+              "eta" => 18
+          ];
+          echo "<p>" . $studente["nome"] . " frequenta la " . $studente["classe"] . ".</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <p>Anna frequenta la 5A.</p>
+        </script>
+
+        <p><code>$studente["nome"]</code> si legge "il valore che, in <code>$studente</code>, sta sotto la chiave <code>nome</code>".</p>
+
+        <h3 id="s1-2">1.2 "Array", ma non come te lo aspetti</h3>
+
+        <p>In PHP una variabile come <code>$studente</code> si chiama <strong>array</strong>. Il nome inganna. In altri linguaggi, come il C++, un array è una fila di caselle numerate 0, 1, 2…, e si legge con un numero: <code>v[0]</code>. In PHP, invece:</p>
+
+        <aside class="box box-regola">
+          <p><strong>In PHP un array è sempre un elenco di coppie chiave → valore.</strong> La chiave può essere un testo (<code>"nome"</code>) o un numero (<code>0</code>). Quando senti "array" in PHP, pensa a un <strong>dizionario</strong>: cerchi una parola (la chiave) e trovi la sua definizione (il valore).</p>
+        </aside>
+
+        <p>Anche quando scrivi un elenco senza chiavi, PHP le aggiunge da solo: 0, 1, 2… La funzione <code>print_r</code> mostra il contenuto di un array, coppia per coppia. Guarda:</p>
+
+        <script type="text/plain" data-php="voti.php" data-url="http://localhost/tpsit/voti.php">
+          <?php
+          $voti = [7, 8, 6];
+          echo "<pre>";
+          print_r($voti);
+          echo "</pre>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <pre>Array
+          (
+              [0] => 7
+              [1] => 8
+              [2] => 6
+          )
+          </pre>
+        </script>
+
+        <p>Leggi l'output di <code>print_r</code>: ogni riga è <code>[chiave] =&gt; valore</code>. Le chiavi <code>0</code>, <code>1</code>, <code>2</code> le ha messe PHP, ma ci sono, e sono chiavi come <code>"nome"</code>. Il tag <code>&lt;pre&gt;</code> serve solo a far rispettare al browser gli a capo e gli spazi di <code>print_r</code>.</p>
+
+        <aside class="box box-attenzione">
+          <p>Le chiavi distinguono maiuscole e minuscole: <code>$studente["nome"]</code> e <code>$studente["Nome"]</code> sono due cose diverse, e la seconda non esiste. Le chiavi di testo vanno tra virgolette: <code>$studente[nome]</code>, senza virgolette, è un errore.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           2. SUPERGLOBALI
+           ================================================================ -->
+      <section>
+        <h2 id="s2">2. Gli array superglobali</h2>
+
+        <p>Quando arriva una richiesta, PHP la legge <strong>prima</strong> di eseguire il tuo codice e ne mette i dati in alcuni array già pronti. Questi array si chiamano <strong>superglobali</strong>:</p>
+        <ul>
+          <li>esistono già quando il tuo codice parte: non li devi creare;</li>
+          <li>si possono usare <strong>ovunque</strong> nel file (da qui il "super");</li>
+          <li>hanno un nome che comincia con <code>$_</code> ed è tutto in maiuscolo.</li>
+        </ul>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Superglobale</th><th>Contiene le coppie chiave → valore…</th></tr></thead>
+            <tbody>
+              <tr><td><code>$_GET</code></td><td>…arrivate nell'<strong>indirizzo</strong>, dopo il <code>?</code></td></tr>
+              <tr><td><code>$_POST</code></td><td>…arrivate nel <strong>corpo</strong> di una richiesta POST, di solito da un modulo</td></tr>
+              <tr><td><code>$_SERVER</code></td><td>…che descrivono la <strong>richiesta</strong> e il <strong>server</strong>; per ora useremo solo <code>"REQUEST_METHOD"</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Ce ne sono altre, come <code>$_COOKIE</code>, <code>$_SESSION</code> e <code>$_FILES</code>: le vedremo nei prossimi moduli. Funzionano tutte allo stesso modo: sono array, quindi <strong>coppie chiave → valore</strong>, e si leggono con la chiave tra parentesi quadre.</p>
+
+        <aside class="box box-server">
+          <p>Le superglobali esistono <strong>solo sul server</strong>, e solo durante l'esecuzione di <strong>quella</strong> richiesta. Il browser non le vede e non sa che esistono: manda testo, ed è PHP a trasformarlo in coppie. Alla richiesta successiva PHP riparte da zero e le riempie di nuovo.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           3. $_GET
+           ================================================================ -->
+      <section>
+        <h2 id="s3">3. $_GET: i dati nell'indirizzo</h2>
+
+        <blockquote class="traccia">
+          <p>Scrivi una pagina che saluti per nome chi la apre. Il nome non è scritto nel file: lo decide chi scrive l'indirizzo.</p>
+        </blockquote>
+
+        <h3 id="s3-1">3.1 La query string</h3>
+
+        <p>Il modo più semplice per mandare dati al server è scriverli nell'indirizzo, dopo un punto interrogativo. Quella parte si chiama <strong>query string</strong> (la "stringa della domanda"):</p>
+
+        <p class="indirizzo" aria-label="http://localhost/tpsit/saluto.php?nome=Anna&amp;classe=5A">
+          <span>http://localhost<small>computer</small></span>
+          <span>/tpsit/saluto.php<small>file</small></span>
+          <span class="indirizzo-porta">?<small>inizio dati</small></span>
+          <span>nome=Anna<small>coppia 1</small></span>
+          <span class="indirizzo-porta">&amp;<small>separa</small></span>
+          <span>classe=5A<small>coppia 2</small></span>
+        </p>
+
+        <ul>
+          <li><code>?</code> separa il percorso del file dai dati;</li>
+          <li>ogni coppia si scrive <code>chiave=valore</code>;</li>
+          <li><code>&amp;</code> separa una coppia dall'altra.</li>
+        </ul>
+
+        <p>Il modo di mandare dati nell'indirizzo si chiama metodo <strong>GET</strong>. È lo stesso <code>GET</code> che hai visto nella prima riga di ogni richiesta: quando scrivi un indirizzo o fai clic su un link, il browser fa sempre una richiesta GET.</p>
+
+        <h3 id="s3-2">3.2 Leggere un valore</h3>
+
+        <p>PHP prende la query string, la spezza in coppie e le mette in <code>$_GET</code>. Per leggere il valore della chiave <code>nome</code> scrivi <code>$_GET["nome"]</code>. Comincia dalla scheda ⓪:</p>
+
+        <script type="text/plain" data-php="saluto.php" data-metodo="GET" data-url="http://localhost/tpsit/saluto.php?nome=Anna">
+          <?php
+          echo "<p>Ciao, " . $_GET["nome"] . "!</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <p>Ciao, Anna!</p>
+        </script>
+
+        <aside class="box box-prova">
+          <p>Salva <code>saluto.php</code> sul tuo server e apri <code>http://localhost/tpsit/saluto.php?nome=Anna</code>. Poi cambia <code>Anna</code> con il tuo nome nella barra degli indirizzi e premi Invio. Il file è sempre lo stesso: cambia la richiesta, e quindi la pagina.</p>
+        </aside>
+
+        <aside class="box box-attenzione">
+          <p>Dentro le virgolette doppie, <code>echo "Ciao, $_GET["nome"]!";</code> è un errore: le virgolette della chiave chiudono la stringa. Per ora usa sempre la <strong>concatenazione</strong> con il punto, come nell'esempio.</p>
+        </aside>
+
+        <h3 id="s3-3">3.3 Guardare dentro $_GET</h3>
+
+        <p>Con <code>print_r</code> vedi tutte le coppie che PHP ha ricavato dall'indirizzo. È il modo più rapido per capire che cosa è arrivato davvero:</p>
+
+        <script type="text/plain" data-php="dentro.php" data-metodo="GET" data-url="http://localhost/tpsit/dentro.php?nome=Anna&amp;classe=5A&amp;eta=18">
+          <pre>
+          <?php print_r($_GET); ?>
+          </pre>
+        </script>
+        <script type="text/plain" data-html>
+          <pre>
+          Array
+          (
+              [nome] => Anna
+              [classe] => 5A
+              [eta] => 18
+          )
+          </pre>
+        </script>
+
+        <p>Confronta la tabella della scheda ⓪ con la scheda ②: sono le stesse tre coppie. E guarda la prima parola che scrive <code>print_r</code>: <strong>Array</strong>. È il nome, un po' fuorviante, che PHP dà a un elenco di coppie chiave → valore.</p>
+
+        <h3 id="s3-4">3.4 I valori sono sempre testo</h3>
+
+        <p>Nell'indirizzo tutto è testo. Anche <code>eta=18</code> arriva come la <strong>stringa</strong> <code>"18"</code>, non come il numero 18. La funzione <code>var_dump</code> mostra il tipo di un valore:</p>
+
+        <script type="text/plain" data-php="eta.php" data-metodo="GET" data-url="http://localhost/tpsit/eta.php?eta=18">
+          <pre>
+          <?php var_dump($_GET["eta"]); ?>
+          </pre>
+          <?php
+          echo "<p>Il prossimo anno avrai " . ($_GET["eta"] + 1) . " anni.</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <pre>
+          string(2) "18"
+          </pre>
+          <p>Il prossimo anno avrai 19 anni.</p>
+        </script>
+
+        <p><code>string(2) "18"</code> vuol dire "una stringa di 2 caratteri". Nei calcoli PHP la converte da solo in numero, per questo <code>+ 1</code> funziona. Ma ricordalo: in <code>$_GET</code> e <code>$_POST</code> ogni valore è una <strong>stringa</strong>.</p>
+
+        <h3 id="s3-5">3.5 Spazi e caratteri speciali</h3>
+
+        <p>Nell'indirizzo alcuni caratteri non si possono scrivere così come sono: lo spazio, <code>&amp;</code>, <code>=</code>, <code>?</code>, le lettere accentate. Il browser li <strong>codifica</strong> con un <code>%</code> seguito da un codice: lo spazio diventa <code>%20</code> (oppure <code>+</code>), l'apostrofo <code>%27</code>, la <code>à</code> <code>%C3%A0</code>. PHP li <strong>decodifica</strong> prima di mettere i valori in <code>$_GET</code>:</p>
+
+        <script type="text/plain" data-php="saluto.php" data-metodo="GET" data-url="http://localhost/tpsit/saluto.php?nome=Anna%20Maria%20D%27Amico">
+          <?php
+          echo "<p>Ciao, " . $_GET["nome"] . "!</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <p>Ciao, Anna Maria D'Amico!</p>
+        </script>
+
+        <aside class="box box-curiosita">
+          <p>Se scrivi uno spazio nella barra degli indirizzi, il browser lo trasforma da solo in <code>%20</code>. Prova: dopo averlo scritto, copia l'indirizzo e incollalo in un file di testo.</p>
+        </aside>
+
+        <h3 id="s3-6">3.6 Link con parametri</h3>
+
+        <p>Nessuno scrive a mano la query string: di solito sta già nei <strong>link</strong>. Un solo file PHP può così mostrare tante pagine diverse, una per ogni link. Qui il titolo prende il colore scelto con i link:</p>
+
+        <script type="text/plain" data-php="colori.php" data-metodo="GET" data-url="http://localhost/tpsit/colori.php?colore=green">
+          <p>
+            Scegli un colore:
+            <a href="colori.php?colore=red">rosso</a> ·
+            <a href="colori.php?colore=green">verde</a> ·
+            <a href="colori.php?colore=blue">blu</a>
+          </p>
+          <?php
+          $colore = $_GET["colore"];
+          echo '<h1 style="color: ' . $colore . '">Titolo in ' . $colore . '</h1>';
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <p>
+            Scegli un colore:
+            <a href="colori.php?colore=red">rosso</a> ·
+            <a href="colori.php?colore=green">verde</a> ·
+            <a href="colori.php?colore=blue">blu</a>
+          </p>
+          <h1 style="color: green">Titolo in green</h1>
+        </script>
+
+        <p>È lo stesso meccanismo di un negozio online: <code>prodotto.php?id=42</code> e <code>prodotto.php?id=43</code> sono lo stesso file, che mostra il prodotto con la chiave <code>id</code> giusta.</p>
+
+        <h3 id="s3-7">3.7 Se la chiave non c'è: isset</h3>
+
+        <p>Che cosa succede se apri <code>saluto.php</code> <strong>senza</strong> la query string? In <code>$_GET</code> non c'è nessuna coppia, e PHP cerca una chiave che non esiste:</p>
+
+        <script type="text/plain" data-php="saluto.php" data-metodo="GET" data-url="http://localhost/tpsit/saluto.php">
+          <?php
+          echo "<p>Ciao, " . $_GET["nome"] . "!</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <br />
+          <b>Warning</b>:  Undefined array key "nome" in <b>C:\xampp\htdocs\tpsit\saluto.php</b> on line <b>2</b><br />
+          <p>Ciao, !</p>
+        </script>
+
+        <p>Il messaggio <strong>Warning: Undefined array key "nome"</strong> vuol dire proprio "nell'array non c'è la chiave <code>nome</code>". A differenza del Parse error, un Warning non ferma il programma: la pagina continua, con un valore vuoto al posto del nome.</p>
+
+        <p>La funzione <code>isset</code> controlla se una chiave esiste: restituisce vero se c'è, falso se manca. Insieme a <code>if</code> ed <code>else</code> ti permette di scegliere che cosa fare nei due casi:</p>
+
+        <script type="text/plain" data-php="saluto2.php" data-metodo="GET" data-url="http://localhost/tpsit/saluto2.php">
+          <?php
+          if (isset($_GET["nome"])) {
+              echo "<p>Ciao, " . $_GET["nome"] . "!</p>";
+          } else {
+              echo "<p>Ciao, sconosciuto! Aggiungi ?nome=... all'indirizzo.</p>";
+          }
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <p>Ciao, sconosciuto! Aggiungi ?nome=... all'indirizzo.</p>
+        </script>
+
+        <ul>
+          <li><code>if (condizione) { … }</code> esegue il primo blocco solo se la condizione è vera;</li>
+          <li><code>else { … }</code> esegue il secondo blocco in tutti gli altri casi.</li>
+        </ul>
+
+        <aside class="box box-regola">
+          <p><strong>Regola</strong>: i dati della richiesta li decide l'utente, non tu. Prima di leggere una chiave di <code>$_GET</code> o <code>$_POST</code>, controlla con <code>isset</code> che ci sia.</p>
+        </aside>
+
+        <h3 id="s3-8">3.8 Mai fidarsi: htmlspecialchars</h3>
+
+        <p>Il nome lo scrive l'utente. E se invece di un nome scrivesse del codice HTML? Proviamo con <code>?nome=&lt;h1&gt;HACKER&lt;/h1&gt;</code> (nell'indirizzo, codificato):</p>
+
+        <script type="text/plain" data-php="saluto.php" data-metodo="GET" data-url="http://localhost/tpsit/saluto.php?nome=%3Ch1%3EHACKER%3C%2Fh1%3E">
+          <?php
+          echo "<p>Ciao, " . $_GET["nome"] . "!</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <p>Ciao, <h1>HACKER</h1>!</p>
+        </script>
+
+        <p>Nella scheda ② il testo dell'utente è finito nell'HTML <strong>come codice</strong>, e nella scheda ③ il browser lo ha disegnato come un titolo. Chiunque può cambiare la tua pagina, solo modificando un link. E al posto di un <code>&lt;h1&gt;</code> potrebbe esserci uno <code>&lt;script&gt;</code> che ruba dati a chi apre quel link: è un attacco che si chiama <strong>XSS</strong> (<em>cross-site scripting</em>).</p>
+
+        <p>La difesa è <code>htmlspecialchars</code>: trasforma i caratteri speciali dell'HTML in <strong>entità</strong>, cioè codici che il browser mostra come caratteri, senza interpretarli come tag. <code>&lt;</code> diventa <code>&amp;lt;</code>, <code>&gt;</code> diventa <code>&amp;gt;</code>, le virgolette diventano <code>&amp;quot;</code>.</p>
+
+        <script type="text/plain" data-php="saluto-sicuro.php" data-metodo="GET" data-url="http://localhost/tpsit/saluto-sicuro.php?nome=%3Ch1%3EHACKER%3C%2Fh1%3E">
+          <?php
+          echo "<p>Ciao, " . htmlspecialchars($_GET["nome"]) . "!</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <p>Ciao, &lt;h1&gt;HACKER&lt;/h1&gt;!</p>
+        </script>
+
+        <aside class="box box-server">
+          <p>Il pericolo nasce proprio dal viaggio che conosci: PHP scrive testo nella risposta, e il browser interpreta come HTML <strong>tutto</strong> ciò che riceve. Non sa distinguere l'HTML scritto da te da quello infilato da un utente. Con <code>htmlspecialchars</code> sei tu a decidere, sul server, che quel testo è solo testo.</p>
+        </aside>
+
+        <aside class="box box-regola">
+          <p><strong>Regola d'oro</strong>: ogni dato che arriva dall'utente passa da <code>htmlspecialchars</code> prima di finire nella pagina. Sempre.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           4. I MODULI HTML
+           ================================================================ -->
+      <section>
+        <h2 id="s4">4. I moduli HTML: le coppie le prepara il browser</h2>
+
+        <p>Scrivere i dati nell'indirizzo va bene per i link, ma un utente vuole riempire dei campi. Per questo l'HTML ha i <strong>moduli</strong> (in inglese <em>form</em>). Un modulo è una pagina normale, anche un semplice file <code>.html</code>:</p>
+
+        <script type="text/plain" data-php="modulo.html" data-url="http://localhost/tpsit/modulo.html">
+          <form action="risposta.php" method="get">
+            <p><label>Nome: <input type="text" name="nome"></label></p>
+            <p><label>Classe: <input type="text" name="classe"></label></p>
+            <p><button type="submit">Invia</button></p>
+          </form>
+        </script>
+        <script type="text/plain" data-html>
+          <form action="risposta.php" method="get">
+            <p><label>Nome: <input type="text" name="nome"></label></p>
+            <p><label>Classe: <input type="text" name="classe"></label></p>
+            <p><button type="submit">Invia</button></p>
+          </form>
+        </script>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Nel modulo</th><th>A cosa serve</th></tr></thead>
+            <tbody>
+              <tr><td><code>action="risposta.php"</code></td><td>il file a cui mandare i dati</td></tr>
+              <tr><td><code>method="get"</code></td><td>il metodo: i dati vanno nell'indirizzo</td></tr>
+              <tr><td><code>name="nome"</code></td><td>la <strong>chiave</strong> del campo</td></tr>
+              <tr><td>il testo scritto nel campo</td><td>il <strong>valore</strong></td></tr>
+              <tr><td><code>&lt;button type="submit"&gt;</code></td><td>il pulsante che invia il modulo</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Quando l'utente scrive "Anna" e "5A" e preme <strong>Invia</strong>, il browser costruisce da solo la query string, con le coppie <code>name=testo</code>, e chiede <code>risposta.php</code>:</p>
+
+        <script type="text/plain" data-php="risposta.php" data-metodo="GET" data-url="http://localhost/tpsit/risposta.php?nome=Anna&amp;classe=5A">
+          <?php
+          $nome = htmlspecialchars($_GET["nome"]);
+          $classe = htmlspecialchars($_GET["classe"]);
+          echo "<p>Ciao $nome della $classe!</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <p>Ciao Anna della 5A!</p>
+        </script>
+
+        <aside class="box box-attenzione">
+          <p>Un campo <strong>senza attributo <code>name</code></strong> non viene inviato: il browser non saprebbe quale chiave dargli. Se una chiave che ti aspetti non arriva in <code>$_GET</code>, controlla prima di tutto il <code>name</code> nel modulo, lettera per lettera.</p>
+        </aside>
+
+        <aside class="box box-prova">
+          <p>Salva <code>modulo.html</code> e <code>risposta.php</code> nella cartella <code>tpsit</code> e apri <code>http://localhost/tpsit/modulo.html</code>. Compila e invia, poi guarda la barra degli indirizzi: c'è la query string costruita dal browser. Prova anche a scrivere uno spazio e una lettera accentata nel nome.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           5. $_POST
+           ================================================================ -->
+      <section>
+        <h2 id="s5">5. $_POST: i dati nel corpo della richiesta</h2>
+
+        <blockquote class="traccia">
+          <p>Scrivi una pagina di accesso: l'utente inserisce nome utente, password e corso di studi.</p>
+        </blockquote>
+
+        <p>Con il metodo GET la password finirebbe nell'indirizzo: visibile nella barra, salvata nella cronologia, magari condivisa per sbaglio copiando il link. Per questi casi esiste il metodo <strong>POST</strong>: i dati non vanno nell'indirizzo, ma nel <strong>corpo</strong> della richiesta, una parte che il browser spedisce dopo le intestazioni.</p>
+
+        <p>Nel modulo basta cambiare <code>method</code>:</p>
+
+        <script type="text/plain" data-php="accesso.html" data-url="http://localhost/tpsit/accesso.html">
+          <form action="accesso.php" method="post">
+            <p><label>Utente: <input type="text" name="utente"></label></p>
+            <p><label>Password: <input type="password" name="password"></label></p>
+            <p>
+              <label>Corso:
+                <select name="corso">
+                  <option value="inf">Informatica</option>
+                  <option value="tel">Telecomunicazioni</option>
+                </select>
+              </label>
+            </p>
+            <p><button type="submit">Accedi</button></p>
+          </form>
+        </script>
+        <script type="text/plain" data-html>
+          <form action="accesso.php" method="post">
+            <p><label>Utente: <input type="text" name="utente"></label></p>
+            <p><label>Password: <input type="password" name="password"></label></p>
+            <p>
+              <label>Corso:
+                <select name="corso">
+                  <option value="inf">Informatica</option>
+                  <option value="tel">Telecomunicazioni</option>
+                </select>
+              </label>
+            </p>
+            <p><button type="submit">Accedi</button></p>
+          </form>
+        </script>
+
+        <p>Nella <code>&lt;select&gt;</code> la chiave è <code>name="corso"</code> e il valore inviato è quello dell'attributo <code>value</code> dell'opzione scelta: <code>inf</code>, non la scritta "Informatica" che vede l'utente.</p>
+
+        <p>Ed ecco la richiesta che parte quando l'utente preme <strong>Accedi</strong>. Guarda bene la scheda ⓪: l'indirizzo non ha il <code>?</code>, e i dati stanno in fondo, dopo una riga vuota. PHP li mette in <code>$_POST</code>, e <code>$_GET</code> resta vuoto.</p>
+
+        <script type="text/plain" data-php="accesso.php" data-metodo="POST" data-url="http://localhost/tpsit/accesso.php" data-corpo="utente=anna.rossi&amp;password=segreto123&amp;corso=inf">
+          <?php
+          $utente = htmlspecialchars($_POST["utente"]);
+          $corso = htmlspecialchars($_POST["corso"]);
+          echo "<p>Benvenuto, $utente!</p>";
+          echo "<p>Corso: $corso</p>";
+          echo "<p>La tua password ha " . strlen($_POST["password"]) . " caratteri.</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <p>Benvenuto, anna.rossi!</p><p>Corso: inf</p><p>La tua password ha 10 caratteri.</p>
+        </script>
+
+        <p>Le coppie chiave → valore sono le stesse di GET, con lo stesso formato <code>chiave=valore&amp;chiave=valore</code>. Cambia solo <strong>dove</strong> viaggiano, e quindi in quale superglobale le trovi. (La funzione <code>strlen</code> restituisce il numero di caratteri di una stringa.)</p>
+
+        <aside class="box box-attenzione">
+          <p>Se il modulo usa <code>method="post"</code>, i dati sono in <code>$_POST</code>. Cercarli in <code>$_GET</code> dà il Warning <code>Undefined array key</code>, perché <code>$_GET</code> è vuoto. Il metodo del modulo e la superglobale devono corrispondere.</p>
+        </aside>
+
+        <h3 id="s5-1">5.1 Vedere i dati POST nel browser</h3>
+
+        <p>I dati POST non si vedono nell'indirizzo, ma <strong>non sono nascosti</strong>. Apri gli strumenti per sviluppatori con <kbd>F12</kbd>, scheda <strong>Rete</strong> (<em>Network</em>), poi invia il modulo. Fai clic sulla richiesta <code>accesso.php</code> e apri la scheda <strong>Payload</strong>: trovi le tue coppie chiave → valore, password compresa.</p>
+
+        <aside class="box box-attenzione" data-titolo="⚠ Attenzione: POST non vuol dire sicuro">
+          <p>POST toglie i dati dall'indirizzo, ma non li <strong>cifra</strong>. Con <code>http://</code> la password viaggia in chiaro e chi intercetta la rete la può leggere. Su un sito vero un modulo con dati riservati va sempre servito in <code>https://</code> (la porta 443 del modulo 01), che cifra tutta la richiesta, corpo compreso.</p>
+        </aside>
+
+        <h3 id="s5-2">5.2 Ricaricare una pagina POST</h3>
+
+        <p>Se dopo l'invio premi <kbd>F5</kbd>, il browser chiede <strong>"Confermare il nuovo invio del modulo?"</strong>. Ricaricare vuol dire rifare la stessa richiesta, corpo compreso: i dati verrebbero spediti una seconda volta. Su un negozio online, sarebbe un secondo ordine. Con GET questo avviso non c'è, perché i dati sono nell'indirizzo e ricaricare è considerato innocuo.</p>
+
+        <h3 id="s5-3">5.3 GET o POST?</h3>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th></th><th>GET</th><th>POST</th></tr></thead>
+            <tbody>
+              <tr><td>Dove viaggiano i dati</td><td>nell'indirizzo, dopo <code>?</code></td><td>nel corpo della richiesta</td></tr>
+              <tr><td>Superglobale</td><td><code>$_GET</code></td><td><code>$_POST</code></td></tr>
+              <tr><td>Visibili nella barra e nella cronologia</td><td>sì</td><td>no (ma visibili con <kbd>F12</kbd>)</td></tr>
+              <tr><td>Si possono salvare nei preferiti o condividere come link</td><td>sì</td><td>no</td></tr>
+              <tr><td>Quantità di dati</td><td>limitata dalla lunghezza dell'indirizzo</td><td>molto grande (anche file)</td></tr>
+              <tr><td>Ricaricando la pagina</td><td>nessun avviso</td><td>"Confermare il nuovo invio?"</td></tr>
+              <tr><td>Quando si usa</td><td>per <strong>chiedere</strong>: ricerche, filtri, pagine di un elenco, link</td><td>per <strong>inviare o modificare</strong>: accessi, iscrizioni, ordini, messaggi</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="box box-regola">
+          <p><strong>Come scegliere</strong>: se la richiesta <strong>legge</strong> qualcosa e ha senso poterla ripetere o condividere, usa GET. Se <strong>cambia</strong> qualcosa sul server o contiene dati riservati, usa POST.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           6. $_SERVER
+           ================================================================ -->
+      <section>
+        <h2 id="s6">6. $_SERVER["REQUEST_METHOD"]: GET o POST?</h2>
+
+        <p><code>$_SERVER</code> è un altro array superglobale, con molte coppie. Non contiene dati scritti dall'utente: descrive la <strong>richiesta</strong> e il <strong>server</strong>. Per ora ci interessa una sola chiave, <code>"REQUEST_METHOD"</code>: il suo valore è il metodo della richiesta, cioè la prima parola che vedi nella scheda ⓪, <code>"GET"</code> oppure <code>"POST"</code>.</p>
+
+        <h3 id="s6-1">6.1 Una pagina che risponde a se stessa</h3>
+
+        <p>Con questa informazione un solo file può fare due lavori: se lo apri normalmente (GET) mostra il modulo; se riceve il modulo inviato (POST) mostra la risposta. Il modulo, infatti, manda i dati <strong>allo stesso file</strong>:</p>
+
+        <script type="text/plain" data-php="iscrizione.php" data-metodo="GET" data-url="http://localhost/tpsit/iscrizione.php">
+          <?php
+          if ($_SERVER["REQUEST_METHOD"] === "POST") {
+              $nome = htmlspecialchars($_POST["nome"]);
+              echo "<p>Grazie, $nome: iscrizione ricevuta!</p>";
+          } else {
+              echo '<form action="iscrizione.php" method="post">';
+              echo '<p><label>Nome: <input type="text" name="nome"></label></p>';
+              echo '<p><button type="submit">Iscriviti</button></p>';
+              echo '</form>';
+          }
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <form action="iscrizione.php" method="post"><p><label>Nome: <input type="text" name="nome"></label></p><p><button type="submit">Iscriviti</button></p></form>
+        </script>
+
+        <p>Prima richiesta: l'utente apre l'indirizzo, il metodo è GET, la condizione è falsa e PHP spedisce il modulo. Seconda richiesta: l'utente scrive "Luca" e preme Iscriviti. Stesso file, ma ora il metodo è POST:</p>
+
+        <script type="text/plain" data-php="iscrizione.php" data-metodo="POST" data-url="http://localhost/tpsit/iscrizione.php" data-corpo="nome=Luca">
+          <?php
+          if ($_SERVER["REQUEST_METHOD"] === "POST") {
+              $nome = htmlspecialchars($_POST["nome"]);
+              echo "<p>Grazie, $nome: iscrizione ricevuta!</p>";
+          } else {
+              echo '<form action="iscrizione.php" method="post">';
+              echo '<p><label>Nome: <input type="text" name="nome"></label></p>';
+              echo '<p><button type="submit">Iscriviti</button></p>';
+              echo '</form>';
+          }
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <p>Grazie, Luca: iscrizione ricevuta!</p>
+        </script>
+
+        <p><code>===</code> confronta due valori e dà vero se sono uguali. Nota che i due esempi hanno la stessa scheda ①, ma schede ⓪ e ② diverse: lo stesso codice, eseguito per due richieste diverse, produce due risposte diverse.</p>
+      </section>
+
+      <!-- ================================================================
+           7. RIEPILOGO ED ESERCIZI
+           ================================================================ -->
+      <section>
+        <h2 id="s7">7. Riepilogo ed esercizi</h2>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Concetto</th><th>In una frase</th></tr></thead>
+            <tbody>
+              <tr><td>array in PHP</td><td>un elenco di coppie <strong>chiave → valore</strong>, anche quando le chiavi sono 0, 1, 2</td></tr>
+              <tr><td><code>$a["chiave"]</code></td><td>il valore che sta sotto quella chiave</td></tr>
+              <tr><td><code>print_r</code>, <code>var_dump</code></td><td>mostrano il contenuto di un array e il tipo di un valore</td></tr>
+              <tr><td>superglobali</td><td>array preparati da PHP con i dati della richiesta, prima del tuo codice</td></tr>
+              <tr><td>query string</td><td><code>?chiave=valore&amp;chiave=valore</code> in fondo all'indirizzo</td></tr>
+              <tr><td><code>$_GET</code></td><td>le coppie della query string</td></tr>
+              <tr><td><code>$_POST</code></td><td>le coppie nel corpo di una richiesta POST</td></tr>
+              <tr><td><code>name</code> nel modulo</td><td>la chiave con cui il campo arriva al server</td></tr>
+              <tr><td><code>$_SERVER</code></td><td>informazioni su richiesta e server; <code>$_SERVER["REQUEST_METHOD"]</code> vale <code>"GET"</code> o <code>"POST"</code></td></tr>
+              <tr><td><code>isset</code></td><td>controlla che una chiave esista prima di leggerla</td></tr>
+              <tr><td><code>htmlspecialchars</code></td><td>rende innocuo il testo dell'utente prima di metterlo nella pagina</td></tr>
+              <tr><td>GET o POST</td><td>GET per chiedere, POST per inviare e modificare; POST non cifra</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 1. Disegna le coppie">
+          <p>Per ognuno di questi indirizzi scrivi su un foglio la tabella chiave → valore di <code>$_GET</code>. Attenzione all'ultimo.</p>
+          <script type="text/plain" data-codice="testo">
+            http://localhost/tpsit/cerca.php?q=pizza
+            http://localhost/tpsit/elenco.php?pagina=3&ordine=prezzo
+            http://localhost/tpsit/meteo.php?citta=Bari&giorni=5&unita=C
+            http://localhost/tpsit/saluto.php?nome=Anna%20Maria&Nome=Luca
+          </script>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 2. La calcolatrice">
+          <p>Crea <code>somma.php</code>: legge da <code>$_GET</code> due numeri, con chiavi <code>a</code> e <code>b</code>, e scrive "a + b = risultato". Provalo con <code>somma.php?a=3&amp;b=4</code>. Poi aggiungi un controllo con <code>isset</code> che mostri un messaggio se manca uno dei due numeri.</p>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 3. Il menu">
+          <p>Crea <code>sezione.php</code> con tre link: <code>sezione.php?pagina=home</code>, <code>?pagina=chi-siamo</code> e <code>?pagina=contatti</code>. Sotto i link, la pagina scrive in un <code>&lt;h1&gt;</code> il nome della sezione scelta, passato da <code>htmlspecialchars</code>.</p>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 4. Il questionario">
+          <p>Crea <code>questionario.html</code>, con un modulo in POST che chiede nome, età e materia preferita (con una <code>&lt;select&gt;</code>), e <code>questionario.php</code>, che mostra un riepilogo delle risposte. Usa <code>htmlspecialchars</code> su ogni valore. Poi, con <kbd>F12</kbd> → Rete, trova le coppie inviate.</p>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 5. Cambia metodo">
+          <p>Nel modulo dell'esercizio 4 cambia <code>method="post"</code> in <code>method="get"</code>, senza toccare il file PHP. Che cosa succede, e perché? Che cosa vedi nella barra degli indirizzi? Correggi il file PHP perché funzioni di nuovo.</p>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 6. Tutto in un file">
+          <p>Riscrivi il questionario come un'unica pagina <code>questionario2.php</code> che usa <code>$_SERVER["REQUEST_METHOD"]</code>: con GET mostra il modulo, con POST mostra il riepilogo.</p>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 7. GET o POST?">
+          <p>Per ognuno di questi casi scegli il metodo e motiva la risposta in una riga: la ricerca di un prodotto; il pagamento di un ordine; il filtro "solo prodotti in offerta"; l'invio di un commento; la pagina 4 di un elenco di notizie; la modifica della propria email.</p>
+        </aside>
+      </section>
+
+      <nav class="nav-moduli" data-navigazione-moduli aria-label="Altri moduli"></nav>
+    </main>
+  </div>
+
+</body>
+</html>
