@@ -25,6 +25,12 @@
    Alla fine controlla anche che le "sezioni" dei moduli in corso.js (l'indice
    del corso nella home) corrispondano ai titoli h2 delle dispense.
 
+   Gli esempi sui file possono avere, subito prima, un blocco data-file-prima
+   (il file di dati da creare prima di eseguire) e, subito dopo il data-html,
+   un blocco data-file-dopo (com'è il file dopo l'esecuzione): anche questo
+   viene confrontato, o riempito con --riempi se è vuoto. Ogni esempio gira in
+   una cartella nuova, che fa da htdocs	psit.
+
    I blocchi data-html con l'attributo data-variabile (output che cambia a
    ogni richiesta, per esempio con date()) vengono eseguiti ma non confrontati.
    ========================================================================== */
@@ -105,33 +111,63 @@ function attributi(string $tag): array
     return $risultato;
 }
 
-function esegui(string $codice, string $nomeFile, array $attributi): string
+// Esegue un esempio in una cartella nuova, come se fosse htdocs\tpsit:
+// $filePrima = [nome => contenuto] sono i file di dati da creare prima,
+// $nomeDopo è il file di dati da leggere dopo (null se non serve).
+// Restituisce [output, contenuto del file dopo (null se non esiste)].
+function esegui(string $codice, string $nomeFile, array $attributi, array $filePrima, ?string $nomeDopo): array
 {
-    $cartella = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'verifica-esempi-' . getmypid();
-    if (!is_dir($cartella)) mkdir($cartella);
+    static $contatore = 0;
+    $contatore++;
+    $cartella = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'verifica-esempi-' . getmypid() . '-' . $contatore;
+    mkdir($cartella);
     $percorso = $cartella . DIRECTORY_SEPARATOR . $nomeFile;
     file_put_contents($percorso, $codice . "\n");
+    foreach ($filePrima as $nome => $contenuto) {
+        file_put_contents($cartella . DIRECTORY_SEPARATOR . $nome, $contenuto);
+    }
 
     // file eseguito prima dell'esempio: riempie $_GET, $_POST e $_SERVER
     $s = superglobali($nomeFile, $attributi);
-    $preludio = $cartella . DIRECTORY_SEPARATOR . '_preludio.php';
+    $preludio = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'verifica-esempi-preludio-' . getmypid() . '.php';
     file_put_contents($preludio, "<?php\n"
         . '$_GET = ' . var_export($s['get'], true) . ";\n"
         . '$_POST = ' . var_export($s['post'], true) . ";\n"
         . '$_SERVER = ' . var_export($s['server'], true) . ";\n"
         . '$_REQUEST = array_merge($_GET, $_POST);' . "\n");
 
-    $comando = escapeshellarg(PHP_BINARY)
+    // come Apache: la cartella di lavoro è quella dello script,
+    // così fopen("iscritti.txt", ...) trova il file accanto all'esempio
+    $comando = 'cd ' . escapeshellarg($cartella) . ' && ' . escapeshellarg(PHP_BINARY)
         . ' -n -d display_errors=1 -d html_errors=1 -d log_errors=0 -d date.timezone=Europe/Rome'
         . ' -d auto_prepend_file=' . escapeshellarg($preludio) . ' '
-        . escapeshellarg($percorso);
+        . escapeshellarg($nomeFile);
     $output = (string) shell_exec($comando);
     // il percorso temporaneo diventa quello che vedrebbe uno studente con XAMPP
     $output = str_replace([realpath($percorso), $percorso], CARTELLA_XAMPP . $nomeFile, $output);
-    unlink($percorso);
+
+    $dopo = null;
+    if ($nomeDopo !== null && is_file($cartella . DIRECTORY_SEPARATOR . $nomeDopo)) {
+        $dopo = file_get_contents($cartella . DIRECTORY_SEPARATOR . $nomeDopo);
+    }
+    foreach (glob($cartella . DIRECTORY_SEPARATOR . '*') as $x) unlink($x);
+    rmdir($cartella);
     unlink($preludio);
-    @rmdir($cartella);
-    return $output;
+    return [$output, $dopo];
+}
+
+// Contenuto di un blocco data-file-prima/dopo → contenuto del file:
+// ogni riga è una riga del file, e il file finisce con un a capo
+function contenutoFile(string $blocco): string
+{
+    $testo = dedent($blocco);
+    return $testo === '' ? '' : $testo . "\n";
+}
+
+// Rientra un testo come il tag <script> che lo conterrà (per --riempi)
+function rientra(string $testo, string $rientro): string
+{
+    return preg_replace('/^(?=.)/m', $rientro . '  ', $testo);
 }
 
 $argomenti = array_slice($argv, 1);
@@ -144,8 +180,11 @@ if (!$file) {
 
 $errori = 0;
 $totale = 0;
-$espressione = '#(<script type="text/plain" (data-php="([^"]+)"[^>]*)>(.*?)</script>(\s*)'
-    . '<script type="text/plain" data-html([^>]*)>)(.*?)(</script>)#s';
+// [file prima]  data-php  data-html  [file dopo]
+$espressione = '#(?:<script type="text/plain" data-file-prima="(?<pnome>[^"]+)">(?<pcont>.*?)</script>\s*)?'
+    . '<script type="text/plain" (?<tag>data-php="(?<nome>[^"]+)"[^>]*)>(?<php>.*?)</script>(?<spazio>\s*)'
+    . '<script type="text/plain" data-html(?<attr>[^>]*)>(?<html>.*?)</script>'
+    . '(?:(?<dspazio>\s*)<script type="text/plain" data-file-dopo="(?<dnome>[^"]+)">(?<dcont>.*?)</script>)?#s';
 
 foreach ($file as $f) {
     $html = file_get_contents($f);
@@ -161,36 +200,69 @@ foreach ($file as $f) {
     $nuovo = preg_replace_callback($espressione, function ($t) use (&$n, &$totale, &$errori, &$riempiti, $mostra, $riempi) {
         $n++;
         $totale++;
-        [$tutto, $prima, $tag, $nome, $php, $spazio, $attributi, $atteso, $chiusura] = $t;
-        $variabile = str_contains($attributi, 'data-variabile');
-        $vero = pulisci(esegui(dedent($php), $nome, attributi($tag)));
+        $inizio = $t[0][1];
+        $tutto = $t[0][0];
+        $g = fn($k) => isset($t[$k]) && $t[$k][1] >= 0 ? $t[$k][0] : null;
+        $nome = $g('nome');
         $numero = str_pad((string) $n, 2, ' ', STR_PAD_LEFT);
+        $variabile = str_contains($g('attr'), 'data-variabile');
+        $filePrima = $g('pnome') !== null ? [$g('pnome') => contenutoFile($g('pcont'))] : [];
+        $nomeDopo = $g('dnome');
 
-        // --riempi: un blocco data-html vuoto riceve l'output vero,
-        // indentato come il tag <script> che lo contiene
+        [$vero, $dopo] = esegui(dedent($g('php')), $nome, attributi($g('tag')), $filePrima, $nomeDopo);
+        $vero = pulisci($vero);
+        $rientro = preg_replace('/^.*\n/s', '', $g('spazio'));
+
+        // sostituzioni da fare dentro il testo trovato: [posizione, lunghezza, testo nuovo]
+        $modifiche = [];
+        $problemi = [];
+
+        $atteso = $g('html');
         if ($riempi && trim($atteso) === '') {
-            $rientro = preg_replace('/^.*\n/s', '', $spazio);
-            $corpo = preg_replace('/^(?=.)/m', $rientro . '  ', $vero);
+            $modifiche[] = [$t['html'][1] - $inizio, strlen($atteso), "\n" . rientra($vero, $rientro) . "\n" . $rientro];
             echo "  + $numero. $nome (data-html riempito)\n";
-            $riempiti++;
-            return $prima . "\n" . $corpo . "\n" . $rientro . $chiusura;
+        } elseif ($variabile) {
+            echo "  ~ $numero. $nome (output variabile: non confrontato)\n";
+        } elseif ($vero !== pulisci(dedent($atteso))) {
+            $problemi[] = "l'output vero è diverso dal blocco data-html\n"
+                . "    --- atteso (data-html)\n" . preg_replace('/^/m', '    | ', pulisci(dedent($atteso))) . "\n"
+                . "    --- vero (php)\n" . preg_replace('/^/m', '    | ', $vero);
         }
 
-        $atteso = pulisci(dedent($atteso));
-        if ($variabile) {
-            echo "  ~ $numero. $nome (output variabile: non confrontato)\n";
-        } elseif ($vero === $atteso) {
-            echo "  ✓ $numero. $nome\n";
-        } else {
-            $errori++;
-            echo "  ✗ $numero. $nome: l'output vero è diverso dal blocco data-html\n";
-            echo "    --- atteso (data-html)\n" . preg_replace('/^/m', '    | ', $atteso) . "\n";
-            echo "    --- vero (php)\n" . preg_replace('/^/m', '    | ', $vero) . "\n";
-            return $tutto;
+        if ($nomeDopo !== null) {
+            $veroFile = $dopo === null ? null : (str_ends_with($dopo, "\n") ? substr($dopo, 0, -1) : $dopo);
+            $attesoFile = $g('dcont');
+            if ($dopo === null) {
+                $problemi[] = "dopo l'esecuzione il file $nomeDopo non esiste";
+            } elseif ($dopo !== '' && !str_ends_with($dopo, "\n")) {
+                $problemi[] = "il file $nomeDopo non finisce con un a capo: il blocco data-file-dopo non lo può mostrare";
+            } elseif ($riempi && trim($attesoFile) === '') {
+                $modifiche[] = [$t['dcont'][1] - $inizio, strlen($attesoFile), "\n" . rientra($veroFile, $rientro) . "\n" . $rientro];
+                echo "  + $numero. $nome (data-file-dopo $nomeDopo riempito)\n";
+            } elseif ($veroFile !== dedent($attesoFile)) {
+                $problemi[] = "il file $nomeDopo è diverso dal blocco data-file-dopo\n"
+                    . "    --- atteso\n" . preg_replace('/^/m', '    | ', dedent($attesoFile)) . "\n"
+                    . "    --- vero\n" . preg_replace('/^/m', '    | ', $veroFile);
+            }
         }
-        if ($mostra) echo preg_replace('/^/m', '    | ', $vero) . "\n";
+
+        if ($problemi) {
+            $errori++;
+            foreach ($problemi as $p) echo "  ✗ $numero. $nome: $p\n";
+        } elseif (!$modifiche && !$variabile) {
+            echo "  ✓ $numero. $nome\n";
+        }
+        if ($mostra) {
+            echo preg_replace('/^/m', '    | ', $vero) . "\n";
+            if ($nomeDopo !== null && $dopo !== null) echo "    🗄 $nomeDopo dopo:\n" . preg_replace('/^/m', '    | ', $dopo);
+        }
+
+        // applico le modifiche dalla fine all'inizio, così le posizioni restano valide
+        usort($modifiche, fn($a, $b) => $b[0] <=> $a[0]);
+        foreach ($modifiche as [$pos, $lung, $testo]) $tutto = substr_replace($tutto, $testo, $pos, $lung);
+        if ($modifiche) $riempiti++;
         return $tutto;
-    }, $html);
+    }, $html, -1, $quanti, PREG_OFFSET_CAPTURE);
 
     if ($n === 0) echo "  (nessun esempio PHP)\n";
     if ($riempiti > 0) file_put_contents($f, $nuovo);

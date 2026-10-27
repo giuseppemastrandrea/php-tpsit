@@ -314,6 +314,79 @@ code.coppie-valore { color: var(--tk-stringa); border-style: dashed; }
 .indirizzo .indirizzo-porta { border-bottom-color: var(--avviso); border-bottom-style: double; border-bottom-width: 4px; font-weight: 700; }
 
 /* --------------------------------------------------------------------------
+   3d. Anatomia della firma di una funzione (come nel manuale di PHP)
+       Uso: <p class="firma"><span class="firma-nome">date<small>nome</small></span>
+            <span class="firma-segno">(</span>
+            <span class="firma-param">string $format<small>obbligatorio</small></span> ...
+            <span class="firma-ritorno">: string<small>tipo restituito</small></span></p>
+       Parametro facoltativo: class="firma-param firma-facoltativo" (bordo tratteggiato)
+   -------------------------------------------------------------------------- */
+.firma {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.2rem;
+  margin: 1rem 0 1.4rem;
+  font-family: var(--font-codice);
+  font-size: 1rem;
+}
+.firma > span {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.25rem 0.45rem;
+  border-radius: 4px;
+  white-space: pre;
+}
+.firma small {
+  font-family: var(--font-testo);
+  font-size: 0.72rem;
+  color: var(--testo-tenue);
+  white-space: normal;
+  text-align: center;
+  max-width: 11rem;
+}
+.firma .firma-segno { padding-left: 0.05rem; padding-right: 0.05rem; color: var(--testo-tenue); font-weight: 700; }
+.firma .firma-nome { border: 1px solid var(--bordo); background: var(--superficie); color: var(--tk-funzione); font-weight: 700; }
+.firma .firma-param { border: 2px solid var(--tk-variabile); background: var(--superficie); }
+.firma .firma-facoltativo { border-style: dashed; }
+.firma .firma-ritorno { border: 4px double var(--tk-parola); background: var(--superficie); color: var(--tk-parola); font-weight: 700; }
+.firma .firma-pezzo { border: 1px solid var(--bordo); border-bottom: 3px solid var(--accento); background: var(--superficie); }
+
+/* --------------------------------------------------------------------------
+   3e. File di dati sul server (data-file-prima / data-file-dopo, da codice.js)
+       Bordo a sinistra spesso e icona: si distingue dal codice e dagli esempi.
+   -------------------------------------------------------------------------- */
+.file-server {
+  margin: 1rem 0 1.2rem;
+  border: 1px solid var(--bordo);
+  border-left: 6px solid var(--avviso);
+  border-radius: var(--raggio);
+  background: var(--superficie);
+  overflow: hidden;
+  break-inside: avoid;
+}
+.file-server-dopo { border-left-style: double; border-left-width: 7px; }
+.file-server figcaption {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: var(--avviso-tenue);
+  border-bottom: 1px solid var(--bordo);
+}
+.file-server-contenuto {
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  overflow-x: auto;
+  font-family: var(--font-codice);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--codice-testo);
+}
+.file-server-acapo { color: var(--avviso); font-weight: 700; margin-left: 0.15em; }
+.file-server-vuoto { color: var(--testo-tenue); font-style: italic; font-family: var(--font-testo); }
+
+/* --------------------------------------------------------------------------
    4. Richiamo a uno strumento (ben visibile)
       Uso: <a class="richiamo" href="..."><strong>Titolo</strong> testo</a>
    -------------------------------------------------------------------------- */

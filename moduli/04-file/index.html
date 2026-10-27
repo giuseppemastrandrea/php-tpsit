@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gestione dei file in PHP · TPSIT 5° anno</title>
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/dispensa.css">
+  <script src="../../assets/js/tema.js"></script>
+  <script src="../../corso.js" defer></script>
+  <script src="../../assets/js/corso-ui.js" defer></script>
+  <script src="../../assets/js/dispensa.js" defer></script>
+  <script src="../../assets/js/codice.js" defer></script>
+</head>
+<body data-radice="../../" data-modulo="04-file">
+
+  <header class="barra">
+    <button type="button" class="pulsante indice-apri" aria-controls="indice" aria-expanded="false">☰ Indice</button>
+    <a class="barra-home" href="../../index.html">← Home <span class="testo-lungo">del corso</span></a>
+    <span class="barra-titolo">Gestione dei file in PHP</span>
+    <button type="button" class="pulsante tema-interruttore" data-tema-interruttore>☾ Scuro</button>
+  </header>
+
+  <div class="dispensa">
+    <nav class="dispensa-indice" id="indice" aria-label="Indice della dispensa">
+      <p class="indice-titolo">Indice</p>
+      <ol data-indice></ol>
+    </nav>
+
+    <main class="dispensa-contenuto">
+      <header class="dispensa-intestazione">
+        <p class="scheda-numero">Modulo 04</p>
+        <h1>Gestione dei file in PHP</h1>
+        <p class="sottotitolo">Apertura, scrittura, lettura e chiusura di un file di testo.</p>
+      </header>
+
+      <!-- ================================================================
+           INTRODUZIONE
+           ================================================================ -->
+      <section>
+        <h2 id="introduzione">Introduzione</h2>
+
+        <p>Nel modulo 02 hai visto che le superglobali esistono solo durante una richiesta: quando PHP ha finito, <code>$_POST</code> e tutte le variabili spariscono. Se un utente si iscrive con un modulo, alla richiesta successiva il suo nome non c'è più.</p>
+
+        <p>Per <strong>ricordare</strong> i dati da una richiesta all'altra bisogna salvarli da qualche parte. Il modo più semplice è un <strong>file di testo</strong> sul server: PHP ci scrive i dati e, a una richiesta successiva, li rilegge.</p>
+
+        <blockquote class="traccia">
+          <p>Registra in un file gli iscritti a un corso (cognome, nome e classe) e mostra l'elenco di tutti gli iscritti.</p>
+        </blockquote>
+
+        <aside class="box box-regola">
+          <p><strong>Due blocchi nuovi</strong>: negli esempi di questa dispensa vedrai il file di dati sul server, <strong>🗄 prima</strong> e <strong>🗄 dopo</strong> la richiesta. Il simbolo <strong>↵</strong> segna gli a capo: in un file di record contano, e di solito non si vedono.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           1. LE OPERAZIONI
+           ================================================================ -->
+      <section>
+        <h2 id="s1">1. Le operazioni su un file di testo</h2>
+
+        <p>La gestione di un file di testo si fa sempre con le stesse operazioni, ognuna con la sua funzione:</p>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>#</th><th>Operazione</th><th>Funzione</th><th>Che cosa fa</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><strong>Apertura</strong> del file</td><td><code>fopen()</code></td><td>apre il file</td></tr>
+              <tr><td>2</td><td><strong>Preparazione</strong> del record</td><td>(concatenazione)</td><td>costruisce il record</td></tr>
+              <tr><td>3</td><td><strong>Registrazione</strong> del record</td><td><code>fwrite()</code></td><td>scrive il record</td></tr>
+              <tr><td>4</td><td><strong>Lettura</strong> dei record</td><td><code>fgets()</code></td><td>legge i record</td></tr>
+              <tr><td>5</td><td><strong>Chiusura</strong> del file</td><td><code>fclose()</code></td><td>chiude il file</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Un <strong>record</strong> è l'insieme dei dati che riguardano una sola cosa: qui, un iscritto. Ogni dato del record (cognome, nome, classe) è un <strong>campo</strong>.</p>
+
+        <aside class="box box-server">
+          <p>Il file sta <strong>sul server</strong>, nella stessa cartella dello script PHP: per esempio <code>C:\xampp\htdocs\tpsit\iscritti.txt</code>. Lo legge e lo scrive PHP. Il browser non vede il file: riceve solo l'HTML che PHP costruisce dopo averlo letto.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           2. APERTURA
+           ================================================================ -->
+      <section>
+        <h2 id="s2">2. Apertura del file: fopen()</h2>
+
+        <p>Prima di scrivere o leggere, il file va <strong>aperto</strong> con <code>fopen</code>. Il primo argomento è il nome del file, il secondo è la <strong>modalità</strong>: dice che cosa vuoi fare con il file.</p>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Modalità</th><th>Significato</th></tr></thead>
+            <tbody>
+              <tr><td><code>"a"</code></td><td>apertura in <strong>scrittura</strong>: aggiunge i dati alla <strong>fine</strong> del file (<em>append</em>)</td></tr>
+              <tr><td><code>"r"</code></td><td>apertura in <strong>lettura</strong>: il file viene aperto per essere letto (<em>read</em>)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="s2-1">2.1 Apertura in scrittura: modalità "a"</h3>
+
+        <script type="text/plain" data-codice="php">
+          <?php
+          // apertura file
+          $file = fopen($nomeFile, "a");
+          ?>
+        </script>
+
+        <p>Con <code>"a"</code> tutto ciò che scrivi viene <strong>aggiunto in fondo</strong>: i record già presenti restano dove sono. Se il file non esiste ancora, PHP lo crea.</p>
+
+        <h3 id="s2-2">2.2 Apertura in lettura: modalità "r"</h3>
+
+        <script type="text/plain" data-codice="php">
+          <?php
+          // apertura file
+          $file = fopen($nomeFile, "r");
+          ?>
+        </script>
+
+        <p>Con <code>"r"</code> il file viene aperto per essere letto. Il file deve esistere già.</p>
+
+        <h3 id="s2-3">2.3 $file ha una duplice funzione</h3>
+
+        <p>Il valore che <code>fopen</code> restituisce, e che salviamo in <code>$file</code>, serve a due cose:</p>
+        <ul>
+          <li><strong>booleana</strong>: indica se l'apertura è stata eseguita correttamente. Se qualcosa va storto, <code>$file</code> vale <code>false</code>;</li>
+          <li><strong>stream dei dati</strong>: rappresenta il <strong>flusso</strong> attraverso cui si leggono o si scrivono i dati. È il "canale" aperto verso il file, e lo passerai a tutte le altre funzioni: <code>fwrite</code>, <code>fgets</code>, <code>fclose</code>.</li>
+        </ul>
+
+        <p>Proviamo ad aprire in lettura un file che <strong>non esiste</strong>. Con <code>if</code> controlliamo la funzione booleana di <code>$file</code>:</p>
+
+        <script type="text/plain" data-php="apri.php" data-url="http://localhost/tpsit/apri.php">
+          <?php
+          $nomeFile = "iscritti.txt";
+          $file = fopen($nomeFile, "r");
+
+          if ($file) {
+              echo "<p>Il file $nomeFile è aperto.</p>";
+              fclose($file);
+          } else {
+              echo "<p>Non riesco ad aprire $nomeFile.</p>";
+          }
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <br />
+          <b>Warning</b>:  fopen(iscritti.txt): Failed to open stream: No such file or directory in <b>C:\xampp\htdocs\tpsit\apri.php</b> on line <b>3</b><br />
+          <p>Non riesco ad aprire iscritti.txt.</p>
+        </script>
+
+        <p>PHP segnala il problema con un Warning, e <code>$file</code> vale <code>false</code>: viene eseguito il ramo <code>else</code>. Ora lo stesso script, ma sul server il file c'è:</p>
+
+        <script type="text/plain" data-file-prima="iscritti.txt">
+          Rossi; Anna; 5A;
+          Bianchi; Luca; 5B;
+        </script>
+        <script type="text/plain" data-php="apri.php" data-url="http://localhost/tpsit/apri.php">
+          <?php
+          $nomeFile = "iscritti.txt";
+          $file = fopen($nomeFile, "r");
+
+          if ($file) {
+              echo "<p>Il file $nomeFile è aperto.</p>";
+              fclose($file);
+          } else {
+              echo "<p>Non riesco ad aprire $nomeFile.</p>";
+          }
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <p>Il file iscritti.txt è aperto.</p>
+        </script>
+
+        <p>Per vedere l'altra funzione di <code>$file</code>, lo stream, usiamo <code>var_dump</code>:</p>
+
+        <script type="text/plain" data-file-prima="iscritti.txt">
+          Rossi; Anna; 5A;
+          Bianchi; Luca; 5B;
+        </script>
+        <script type="text/plain" data-php="stream.php" data-url="http://localhost/tpsit/stream.php">
+          <pre>
+          <?php
+          $file = fopen("iscritti.txt", "r");
+          var_dump($file);
+          fclose($file);
+          ?>
+          </pre>
+        </script>
+        <script type="text/plain" data-html>
+          <pre>
+          resource(6) of type (stream)
+          </pre>
+        </script>
+
+        <p><code>resource of type (stream)</code>: quando l'apertura riesce, <code>$file</code> non contiene il testo del file, ma il <strong>canale</strong> per leggerlo. Il numero tra parentesi è un identificativo che PHP assegna allo stream, e può cambiare.</p>
+
+      </section>
+
+      <!-- ================================================================
+           3. PREPARAZIONE DEL RECORD
+           ================================================================ -->
+      <section>
+        <h2 id="s3">3. Preparazione del record</h2>
+
+        <p>In un file di testo non si scrivono "campi": si scrive <strong>testo</strong>. Per questo i campi del record vengono <strong>concatenati in un'unica stringa</strong>:</p>
+
+        <script type="text/plain" data-codice="php">
+          <?php
+          $record  = "";
+          $record .= $campo1;
+          $record .= "; ";
+          $record .= $campo2;
+          $record .= "; ";
+          // ...
+          $record .= $campon;
+          $record .= ";";
+          $record .= "\n";
+          ?>
+        </script>
+
+        <p>L'operatore <code>.=</code> <strong>aggiunge in fondo</strong> a una stringa: <code>$record .= "; ";</code> vuol dire <code>$record = $record . "; ";</code>. Si parte da una stringa vuota e si attaccano, uno dopo l'altro, i campi e i separatori.</p>
+
+        <h3 id="s3-1">3.1 I separatori</h3>
+
+        <ul>
+          <li>tra un dato e il successivo viene posto il carattere <strong><code>;</code></strong>;</li>
+          <li>tra un record e il successivo viene posto il carattere <strong><code>\n</code></strong> (andata a capo).</li>
+        </ul>
+
+        <p>Così ogni record occupa <strong>una riga</strong> del file, e dentro la riga i campi sono divisi dal punto e virgola. Prepariamo il record di un'iscritta e mostriamolo:</p>
+
+        <script type="text/plain" data-php="record.php" data-url="http://localhost/tpsit/record.php">
+          <?php
+          $campo1 = "Verdi";
+          $campo2 = "Sara";
+          $campo3 = "5A";
+
+          $record  = "";
+          $record .= $campo1;
+          $record .= "; ";
+          $record .= $campo2;
+          $record .= "; ";
+          $record .= $campo3;
+          $record .= ";";
+          $record .= "\n";
+
+          echo "<p>Il record è: " . $record . "</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <p>Il record è: Verdi; Sara; 5A;
+          </p>
+        </script>
+
+        <p>Guarda la scheda ②: il <code>\n</code> è diventato un vero a capo, subito prima di <code>&lt;/p&gt;</code>. Nella pagina (scheda ③) non si vede, perché per il browser un a capo è uno spazio: è quello che hai visto nel modulo 01. Nel file, invece, quell'a capo è proprio ciò che separa un record dal successivo.</p>
+
+        <aside class="box box-attenzione">
+          <p><code>\n</code> funziona solo tra <strong>virgolette doppie</strong>. Con <code>$record .= '\n';</code>, tra virgolette singole, nel file finirebbero i due caratteri <code>\</code> e <code>n</code>, e tutti i record resterebbero sulla stessa riga.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           4. REGISTRAZIONE E CHIUSURA
+           ================================================================ -->
+      <section>
+        <h2 id="s4">4. Registrazione e chiusura: fwrite() e fclose()</h2>
+
+        <p>Con il file aperto e il record pronto, la <strong>scrittura</strong> del record si fa con <code>fwrite</code>, passando lo stream e la stringa. Poi lo stream va <strong>rilasciato</strong> con <code>fclose</code>:</p>
+
+        <script type="text/plain" data-codice="php">
+          <?php
+          // registrazione del record
+          fwrite($file, $record);
+
+          // ...
+
+          // chiusura del file
+          fclose($file);
+          ?>
+        </script>
+
+        <p>Mettiamo insieme apertura in <code>"a"</code>, preparazione, registrazione e chiusura. Sul server ci sono già due iscritti:</p>
+
+        <script type="text/plain" data-file-prima="iscritti.txt">
+          Rossi; Anna; 5A;
+          Bianchi; Luca; 5B;
+        </script>
+        <script type="text/plain" data-php="registra.php" data-url="http://localhost/tpsit/registra.php">
+          <?php
+          $nomeFile = "iscritti.txt";
+          $campo1 = "Verdi";
+          $campo2 = "Sara";
+          $campo3 = "5A";
+
+          // apertura file
+          $file = fopen($nomeFile, "a");
+
+          // preparazione del record
+          $record  = $campo1;
+          $record .= "; ";
+          $record .= $campo2;
+          $record .= "; ";
+          $record .= $campo3;
+          $record .= ";\n";
+
+          // registrazione del record
+          fwrite($file, $record);
+
+          // chiusura del file
+          fclose($file);
+
+          echo "<p>Iscrizione registrata.</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <p>Iscrizione registrata.</p>
+        </script>
+        <script type="text/plain" data-file-dopo="iscritti.txt">
+          Rossi; Anna; 5A;
+          Bianchi; Luca; 5B;
+          Verdi; Sara; 5A;
+        </script>
+
+        <p>Il nuovo record è finito <strong>in fondo</strong>, dopo i due che c'erano: è la modalità <code>"a"</code>. Nota anche due abbreviazioni rispetto alla sezione 3: il record parte direttamente da <code>$campo1</code> invece che dalla stringa vuota, e l'ultimo <code>";"</code> e il <code>"\n"</code> sono aggiunti insieme, con <code>";\n"</code>. Il risultato è lo stesso.</p>
+
+        <aside class="box box-server">
+          <p>Confronta la scheda ② con il file dopo la richiesta. Al browser è arrivata solo la frase "Iscrizione registrata.": il record è rimasto <strong>sul server</strong>, nel file. E nel file resta anche dopo la fine della richiesta, a differenza delle variabili e di <code>$_POST</code>.</p>
+        </aside>
+
+        <aside class="box box-attenzione">
+          <p>Ogni volta che ricarichi <code>registra.php</code> fai una <strong>nuova richiesta</strong>: lo script viene rieseguito e il record viene aggiunto <strong>di nuovo</strong>. Tre ricariche, tre righe "Verdi; Sara; 5A;" in fondo al file.</p>
+        </aside>
+
+        <p>E se il file non c'è ancora? In modalità <code>"a"</code> PHP lo crea, e il primo record diventa la prima riga:</p>
+
+        <script type="text/plain" data-php="registra.php" data-url="http://localhost/tpsit/registra.php">
+          <?php
+          $nomeFile = "iscritti.txt";
+          $campo1 = "Verdi";
+          $campo2 = "Sara";
+          $campo3 = "5A";
+
+          // apertura file
+          $file = fopen($nomeFile, "a");
+
+          // preparazione del record
+          $record  = $campo1;
+          $record .= "; ";
+          $record .= $campo2;
+          $record .= "; ";
+          $record .= $campo3;
+          $record .= ";\n";
+
+          // registrazione del record
+          fwrite($file, $record);
+
+          // chiusura del file
+          fclose($file);
+
+          echo "<p>Iscrizione registrata.</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <p>Iscrizione registrata.</p>
+        </script>
+        <script type="text/plain" data-file-dopo="iscritti.txt">
+          Verdi; Sara; 5A;
+        </script>
+
+        <aside class="box box-prova">
+          <p>Esegui <code>registra.php</code> sul tuo server, poi apri <code>iscritti.txt</code> con il Blocco note dalla cartella <code>htdocs\tpsit</code>. Ricarica la pagina e riapri il file. Poi prova a cambiare i valori dei campi.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           5. LETTURA
+           ================================================================ -->
+      <section>
+        <h2 id="s5">5. Lettura di tutti i record: fgets()</h2>
+
+        <p>Per leggere, il file si apre in modalità <code>"r"</code>. Poi si leggono i record <strong>uno alla volta</strong>: <code>fgets</code> legge dallo stream una riga, cioè un record, compreso il suo <code>\n</code> finale. A ogni chiamata, lo stream va avanti di una riga.</p>
+
+        <p>Quante volte chiamare <code>fgets</code>? Non lo sai: dipende da quanti record ci sono nel file. Per questo la lettura si fa con un <strong>ciclo</strong> che continua fino alla fine del file:</p>
+
+        <script type="text/plain" data-codice="php">
+          <?php
+          // lettura di tutti i record del file
+          while (!feof($file)) {
+              $record = fgets($file);
+              echo $record;
+              echo "<br>";
+          }
+          ?>
+        </script>
+
+        <ul>
+          <li><code>while (condizione) { … }</code> ripete il blocco tra graffe <strong>finché</strong> la condizione è vera;</li>
+          <li><code>feof($file)</code> (<em>end of file</em>) restituisce vero quando lo stream è arrivato alla <strong>fine del file</strong>;</li>
+          <li><code>!</code> rovescia vero e falso: <code>!feof($file)</code> si legge "<strong>non</strong> sono alla fine del file".</li>
+        </ul>
+
+        <p>Quindi: finché non sei alla fine del file, leggi un record, scrivilo nella pagina e vai a capo con <code>&lt;br&gt;</code>.</p>
+
+        <script type="text/plain" data-file-prima="iscritti.txt">
+          Rossi; Anna; 5A;
+          Bianchi; Luca; 5B;
+          Verdi; Sara; 5A;
+        </script>
+        <script type="text/plain" data-php="elenco.php" data-url="http://localhost/tpsit/elenco.php">
+          <?php
+          $nomeFile = "iscritti.txt";
+
+          // apertura file
+          $file = fopen($nomeFile, "r");
+
+          // lettura di tutti i record del file
+          while (!feof($file)) {
+              $record = fgets($file);
+              echo $record;
+              echo "<br>";
+          }
+
+          // chiusura del file
+          fclose($file);
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          Rossi; Anna; 5A;
+          <br>Bianchi; Luca; 5B;
+          <br>Verdi; Sara; 5A;
+          <br><br>
+        </script>
+
+        <p>Nella scheda ② ogni record è seguito dal suo <code>\n</code>, che va a capo nel sorgente, e dal <code>&lt;br&gt;</code>, che va a capo nella pagina. Senza <code>echo "&lt;br&gt;";</code> la scheda ② sarebbe quasi uguale, ma nella pagina i tre record finirebbero sulla stessa riga.</p>
+
+        <aside class="box box-attenzione" data-titolo="⚠ Attenzione: il giro in più">
+          <p>Guarda la fine della scheda ②: c'è un <code>&lt;br&gt;</code> in più, da solo. Dopo aver letto l'ultimo record, <code>feof</code> non è ancora vero: PHP si accorge della fine del file solo quando prova a leggere oltre. Così il ciclo fa un <strong>ultimo giro</strong>, in cui <code>fgets</code> non trova niente da leggere (restituisce <code>false</code>, che <code>echo</code> scrive come testo vuoto) e il <code>&lt;br&gt;</code> viene scritto lo stesso. Nella pagina diventa solo una riga vuota in fondo.</p>
+        </aside>
+
+        <aside class="box box-server">
+          <p>Il file resta sul server; al browser arriva il suo contenuto, ma <strong>dentro l'HTML</strong> costruito da PHP. Chi apre <code>elenco.php</code> vede l'elenco, ma non sa nemmeno come si chiama il file da cui viene.</p>
+        </aside>
+
+      </section>
+
+      <!-- ================================================================
+           6. CHIUSURA
+           ================================================================ -->
+      <section>
+        <h2 id="s6">6. Chiusura del file: fclose()</h2>
+
+        <p>La chiusura completa il ciclo di gestione:</p>
+
+        <script type="text/plain" data-codice="php">
+          <?php
+          // chiusura del file
+          fclose($file);
+          ?>
+        </script>
+
+        <p><code>fclose</code> rilascia lo stream: il canale verso il file viene chiuso e il file torna libero, per esempio per un'altra richiesta che lo vuole aprire. Dopo <code>fclose</code>, <code>$file</code> non si può più usare per leggere o scrivere: per farlo, il file va riaperto con <code>fopen</code>.</p>
+
+        <aside class="box box-regola">
+          <p><strong>Regola</strong>: ogni <code>fopen</code> ha il suo <code>fclose</code>. Apri, lavori, chiudi.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           7. ESEMPIO COMPLETO
+           ================================================================ -->
+      <section>
+        <h2 id="s7">7. Esempio completo: scrittura e successiva lettura</h2>
+
+        <p>Ora tutto insieme, nello stesso script: prima si <strong>scrive</strong> un nuovo record (apertura in <code>"a"</code>, preparazione, registrazione, chiusura), poi si <strong>legge</strong> tutto il file (apertura in <code>"r"</code>, ciclo di lettura, chiusura). È la soluzione della traccia iniziale.</p>
+
+        <script type="text/plain" data-file-prima="iscritti.txt">
+          Rossi; Anna; 5A;
+          Bianchi; Luca; 5B;
+        </script>
+        <script type="text/plain" data-php="iscrizioni.php" data-url="http://localhost/tpsit/iscrizioni.php">
+          <?php
+          $nomeFile = "iscritti.txt";
+          $campo1 = "Neri";
+          $campo2 = "Paolo";
+          $campo3 = "5C";
+
+          // SCRITTURA
+          $file = fopen($nomeFile, "a");
+
+          $record  = $campo1;
+          $record .= "; ";
+          $record .= $campo2;
+          $record .= "; ";
+          $record .= $campo3;
+          $record .= ";\n";
+
+          fwrite($file, $record);
+          fclose($file);
+
+          // LETTURA
+          $file = fopen($nomeFile, "r");
+
+          while (!feof($file)) {
+              $record = fgets($file);
+              echo $record;
+              echo "<br>";
+          }
+
+          fclose($file);
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          Rossi; Anna; 5A;
+          <br>Bianchi; Luca; 5B;
+          <br>Neri; Paolo; 5C;
+          <br><br>
+        </script>
+        <script type="text/plain" data-file-dopo="iscritti.txt">
+          Rossi; Anna; 5A;
+          Bianchi; Luca; 5B;
+          Neri; Paolo; 5C;
+        </script>
+
+        <p>Il file viene aperto <strong>due volte</strong>, con due modalità diverse: prima in scrittura, poi in lettura. Tra le due aperture c'è un <code>fclose</code>: il record viene registrato davvero nel file prima che lo stream di lettura lo rilegga, insieme a tutti gli altri.</p>
+      </section>
+
+      <!-- ================================================================
+           8. RIEPILOGO ED ESERCIZI
+           ================================================================ -->
+      <section>
+        <h2 id="s8">8. Riepilogo ed esercizi</h2>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>#</th><th>Passo</th><th>Codice</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><strong>Apri</strong> il file</td><td><code>$file = fopen($nomeFile, "a");</code> oppure <code>"r"</code></td></tr>
+              <tr><td>2</td><td><strong>Prepara</strong>: costruisci il record</td><td><code>$record .= $campo1; $record .= "; "; … $record .= ";\n";</code></td></tr>
+              <tr><td>3</td><td><strong>Scrivi</strong> il record</td><td><code>fwrite($file, $record);</code></td></tr>
+              <tr><td>4</td><td><strong>Leggi</strong> i record</td><td><code>while (!feof($file)) { $record = fgets($file); … }</code></td></tr>
+              <tr><td>5</td><td><strong>Chiudi</strong> il file</td><td><code>fclose($file);</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Concetto</th><th>In una frase</th></tr></thead>
+            <tbody>
+              <tr><td>modalità <code>"a"</code></td><td>scrittura: aggiunge i dati alla fine del file (e lo crea se non c'è)</td></tr>
+              <tr><td>modalità <code>"r"</code></td><td>lettura: il file viene aperto per essere letto</td></tr>
+              <tr><td><code>$file</code></td><td>booleana (l'apertura è riuscita?) e stream dei dati</td></tr>
+              <tr><td>record</td><td>i campi concatenati in un'unica stringa</td></tr>
+              <tr><td><code>;</code> e <code>\n</code></td><td><code>;</code> tra un dato e il successivo, <code>\n</code> tra un record e il successivo</td></tr>
+              <tr><td><code>.=</code></td><td>aggiunge in fondo a una stringa</td></tr>
+              <tr><td><code>feof</code></td><td>vero quando lo stream è arrivato alla fine del file</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 1. Prevedi il file">
+          <p>Il file <code>iscritti.txt</code> contiene due record. Esegui tre volte lo script della sezione 4, poi una volta lo script della sezione 7. Scrivi su un foglio il contenuto del file, riga per riga, e che cosa mostra la pagina alla fine. Poi verifica sul tuo server.</p>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 2. Caccia agli errori">
+          <p>Questo script dovrebbe aggiungere un record al file, ma contiene cinque errori. Trovali e correggili.</p>
+          <script type="text/plain" data-codice="php">
+            <?php
+            $campo1 = "Gialli";
+            $campo2 = "Marta";
+            $file = fopen("iscritti.txt", "r");
+            $record = $campo1;
+            $record = "; ";
+            $record .= $campo2;
+            $record .= ';\n';
+            fwrite($record);
+            ?>
+          </script>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 3. Il libro degli ospiti">
+          <p>Crea <code>ospiti.html</code> con un modulo in POST che chiede nome e città, e <code>ospiti.php</code> che aggiunge un record <code>nome; città;</code> al file <code>ospiti.txt</code> e poi mostra tutti i record. Ricorda il modulo 02: prendi i campi da <code>$_POST</code>, e quando li scrivi nella pagina passali da <code>htmlspecialchars</code>.</p>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 4. Il registro delle visite">
+          <p>Crea <code>visite.php</code>: a ogni richiesta aggiunge al file <code>visite.txt</code> un record con la data e l'ora della visita, in due campi separati (usa <code>date</code>, modulo 03). Poi mostra l'elenco di tutte le visite. Ricarica la pagina qualche volta e guarda crescere il file.</p>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 5. Solo lettura">
+          <p>Dividi l'esempio completo in due file: <code>aggiungi.php</code>, che registra un record e basta, ed <code>elenco.php</code>, che mostra i record e basta. Che cosa succede se apri <code>elenco.php</code> prima di aver mai aperto <code>aggiungi.php</code>, cioè quando il file non esiste? Usa la funzione booleana di <code>$file</code> per mostrare il messaggio "Nessun iscritto".</p>
+        </aside>
+      </section>
+
+      <nav class="nav-moduli" data-navigazione-moduli aria-label="Altri moduli"></nav>
+    </main>
+  </div>
+
+</body>
+</html>

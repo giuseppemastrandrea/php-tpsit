@@ -27,6 +27,10 @@
                                                    la richiesta HTTP e le coppie
                                                    chiave → valore di $_GET / $_POST
         data-corpo="nome=Anna&amp;eta=18"           corpo della richiesta POST
+      Prima del blocco data-php e dopo il data-html possono esserci i file di
+      dati sul server (vedi preparaFileServer):
+        <script type="text/plain" data-file-prima="iscritti.txt"> ... </script>
+        <script type="text/plain" data-file-dopo="iscritti.txt"> ... </script>
       Attributi facoltativi del blocco data-html:
         data-variabile   l'output cambia a ogni richiesta (es. data e ora):
                          controlli/verifica-esempi.php non lo confronta
@@ -740,9 +744,44 @@
     });
   }
 
+  // File di dati sul server (per i moduli sui file):
+  //   <script type="text/plain" data-file-prima="iscritti.txt"> com'è il file prima della richiesta
+  //   <script type="text/plain" data-file-dopo="iscritti.txt">  com'è il file dopo la richiesta
+  // Ogni riga del blocco è una riga del file, che finisce sempre con un a capo:
+  // gli a capo si vedono come ↵, perché nei file di record contano.
+  function preparaFileServer() {
+    document.querySelectorAll('script[type="text/plain"][data-file-prima], script[type="text/plain"][data-file-dopo]').forEach(function (s) {
+      const prima = s.hasAttribute("data-file-prima");
+      const nome = s.getAttribute(prima ? "data-file-prima" : "data-file-dopo");
+      const testo = dedent(s.textContent);
+      const box = crea("figure", "file-server" + (prima ? "" : " file-server-dopo"));
+      const titolo = crea("figcaption");
+      titolo.appendChild(crea("span", "file-server-icona", "🗄"));
+      titolo.appendChild(document.createTextNode(" Sul server: "));
+      titolo.appendChild(crea("code", "", nome));
+      titolo.appendChild(document.createTextNode(prima ? ", prima della richiesta" : ", dopo la richiesta"));
+      box.appendChild(titolo);
+      const pre = crea("pre", "file-server-contenuto");
+      if (testo === "") {
+        pre.appendChild(crea("span", "file-server-vuoto", "(file vuoto)"));
+      } else {
+        testo.split("\n").forEach(function (riga) {
+          pre.appendChild(document.createTextNode(riga));
+          const acapo = crea("span", "file-server-acapo", "↵");
+          acapo.title = "a capo (\\n)";
+          pre.appendChild(acapo);
+          pre.appendChild(document.createTextNode("\n"));
+        });
+      }
+      box.appendChild(pre);
+      s.replaceWith(box);
+    });
+  }
+
   window.CodicePHP = { evidenzia: evidenzia, dedent: dedent, esempi: esempi };
 
   function avvia() {
+    preparaFileServer();
     preparaEsempi();
     preparaCodiceDaLeggere();
   }

@@ -48,6 +48,7 @@ assets/
   js/codice.js            evidenziatore di sintassi (PHP, HTML, CSS, JS, C++) ed "esempio PHP"
 controlli/
   verifica-esempi.php     esegue gli esempi (simulando GET/POST/$_SERVER), confronta o riempie l'output
+  catture-php-net.py      rifà gli screenshot di php.net del modulo 03 (Chrome headless + ImageMagick)
 moduli/
   _modello/index.html     dispensa vuota da copiare (NON compare nella home)
   NN-nome/index.html      una dispensa per modulo
@@ -77,6 +78,8 @@ moduli/
   `===` e `!==`, nei file di solo PHP niente `?>` finale.
 - Screenshot: preferire immagini con licenza libera (Wikimedia Commons) e scrivere sempre autore,
   fonte e licenza nella didascalia (`<span class="crediti">`).
+- Documentazione: si usa il manuale **inglese** di php.net (sempre aggiornato), traducendo i termini.
+  Le firme delle funzioni si copiano da php.net, mai a memoria. Il manuale è CC BY 3.0.
 
 ## Sintassi delle dispense
 
@@ -118,6 +121,11 @@ echo "<p>Ciao!</p>";
   di `$_GET`/`$_POST`); `data-corpo="a=1&amp;b=2"` è il corpo di una richiesta POST.
 - Il file può essere anche un `.html` senza PHP: la scheda ② dice che viene spedito così com'è.
 - Il `data-html` si lascia vuoto e si riempie con `php controlli/verifica-esempi.php --riempi`.
+- File di dati sul server: `<script type="text/plain" data-file-prima="nome.txt">` subito **prima** del
+  `data-php` (contenuto del file prima della richiesta) e `data-file-dopo="nome.txt"` subito **dopo** il
+  `data-html` (contenuto dopo; vuoto → lo riempie `--riempi`). Ogni riga del blocco è una riga del file,
+  che finisce sempre con `\n`; nella pagina gli a capo si vedono come ↵. Ogni esempio gira in una
+  cartella nuova, con la cartella di lavoro dello script (come Apache).
 - `data-variabile` sul `data-html`: output che cambia a ogni richiesta (per esempio `date()`),
   non confrontato dalla verifica.
 - La scheda ③ mostra l'HTML in un iframe senza script.
@@ -140,6 +148,10 @@ Etichetta diversa: `data-titolo="⚠ Attenzione: niente doppio clic"`.
 - Traccia: `<blockquote class="traccia"><p>...</p></blockquote>`
 - Tabella: `<div class="tabella"><table>...</table></div>`
 - Figura: `<figure class="figura"><img ...><figcaption>... <span class="crediti">...</span></figcaption></figure>`
+- Anatomia di un indirizzo: `<p class="indirizzo"><span>pezzo<small>etichetta</small></span>...</p>`
+  (`.indirizzo-porta` evidenzia il pezzo di cui si parla)
+- Anatomia della firma di una funzione: `<p class="firma">` con `<span class="firma-nome">`, `firma-segno`,
+  `firma-param` (+ `firma-facoltativo`, bordo tratteggiato), `firma-ritorno`, `firma-pezzo`; ogni span con `<small>`
 - Link precedente/successivo: `<nav class="nav-moduli" data-navigazione-moduli></nav>`
 
 ## Verifiche prima di consegnare

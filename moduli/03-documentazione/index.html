@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leggere la documentazione: date() e il timestamp · TPSIT 5° anno</title>
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/dispensa.css">
+  <script src="../../assets/js/tema.js"></script>
+  <script src="../../corso.js" defer></script>
+  <script src="../../assets/js/corso-ui.js" defer></script>
+  <script src="../../assets/js/dispensa.js" defer></script>
+  <script src="../../assets/js/codice.js" defer></script>
+</head>
+<body data-radice="../../" data-modulo="03-documentazione">
+
+  <header class="barra">
+    <button type="button" class="pulsante indice-apri" aria-controls="indice" aria-expanded="false">☰ Indice</button>
+    <a class="barra-home" href="../../index.html">← Home <span class="testo-lungo">del corso</span></a>
+    <span class="barra-titolo">Leggere la documentazione: date() e il timestamp</span>
+    <button type="button" class="pulsante tema-interruttore" data-tema-interruttore>☾ Scuro</button>
+  </header>
+
+  <div class="dispensa">
+    <nav class="dispensa-indice" id="indice" aria-label="Indice della dispensa">
+      <p class="indice-titolo">Indice</p>
+      <ol data-indice></ol>
+    </nav>
+
+    <main class="dispensa-contenuto">
+      <header class="dispensa-intestazione">
+        <p class="scheda-numero">Modulo 03</p>
+        <h1>Leggere la documentazione: date() e il timestamp</h1>
+        <p class="sottotitolo">Come si legge una pagina del manuale di PHP, partendo da una funzione che conosci già.</p>
+      </header>
+
+      <!-- ================================================================
+           INTRODUZIONE
+           ================================================================ -->
+      <section>
+        <h2 id="introduzione">Introduzione</h2>
+
+        <p>Nel modulo 01 hai scritto <code>date("d/m/Y")</code> e <code>date("H:i:s")</code>, e hai visto comparire la data e l'ora. Ma chi ha deciso che <code>d</code> vuol dire giorno e <code>i</code> minuti? E che cosa altro sa fare <code>date</code>? Nessuno se lo ricorda a memoria: chi programma lo <strong>legge nella documentazione</strong>.</p>
+
+        <p>PHP ha migliaia di funzioni. Nessun corso le può spiegare tutte, e non serve: serve saper leggere la pagina del <strong>manuale ufficiale</strong> che le descrive. In questa dispensa impariamo a farlo su una funzione sola, <code>date</code>, guardandola da vicino:</p>
+        <ol>
+          <li>come si trova una funzione nel manuale di PHP;</li>
+          <li>come è fatta una pagina del manuale, sezione per sezione;</li>
+          <li>che cos'è un <strong>timestamp</strong>, la parola che compare già nel titolo della pagina;</li>
+          <li>come si legge la <strong>firma</strong> di una funzione: parametri, tipi, valori predefiniti, valore restituito;</li>
+          <li>come si usa una tabella del manuale, quella dei caratteri di formato;</li>
+          <li>un metodo per leggere qualsiasi altra pagina.</li>
+        </ol>
+
+        <aside class="box box-regola">
+          <p><strong>Tieni aperto il manuale</strong> mentre leggi: <code>https://www.php.net/manual/en/function.date.php</code>. Le immagini di questa dispensa sono prese da lì, ma la pagina vera la puoi esplorare, e i link funzionano.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           1. IL MANUALE
+           ================================================================ -->
+      <section>
+        <h2 id="s1">1. Il manuale di PHP</h2>
+
+        <p>La documentazione ufficiale di PHP è sul sito <strong>php.net</strong>, nella sezione <em>Documentation</em>. Ogni funzione ha una sua pagina. Ci sono tre modi per arrivarci:</p>
+        <ul>
+          <li>la casella <strong>Search docs</strong> in alto a destra: scrivi <code>date</code> e scegli la funzione dall'elenco;</li>
+          <li>la scorciatoia nell'indirizzo: <code>php.net/date</code> porta direttamente alla pagina di <code>date</code>. Vale per qualsiasi funzione: <code>php.net/strlen</code>, <code>php.net/htmlspecialchars</code>…;</li>
+          <li>un motore di ricerca, con le parole <code>php date</code>. Attenzione a scegliere il risultato che comincia con <code>php.net</code>: ci sono molti siti che copiano il manuale, spesso vecchi o sbagliati.</li>
+        </ul>
+
+        <h3 id="s1-1">1.1 Perché in inglese</h3>
+
+        <p>In cima a ogni pagina c'è il menu <strong>Change language</strong>, e tra le lingue c'è l'italiano. Noi però useremo la versione <strong>inglese</strong>. La traduzione italiana è incompleta e spesso resta indietro di qualche versione di PHP: una pagina tradotta può descrivere una funzione com'era anni fa. L'originale inglese, invece, è sempre aggiornato. E l'inglese del manuale è sempre lo stesso, poche parole che si ripetono: le impari una volta e valgono per tutte le pagine.</p>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Nel manuale</th><th>In italiano</th><th>Che cosa trovi</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Description</strong></td><td>Descrizione</td><td>la <strong>firma</strong> della funzione e che cosa fa</td></tr>
+              <tr><td><strong>Parameters</strong></td><td>Parametri</td><td>gli argomenti da passare, uno per uno</td></tr>
+              <tr><td><strong>Return Values</strong></td><td>Valori restituiti</td><td>che cosa ti dà indietro la funzione</td></tr>
+              <tr><td><strong>Errors/Exceptions</strong></td><td>Errori/Eccezioni</td><td>quando e come la funzione segnala un problema</td></tr>
+              <tr><td><strong>Changelog</strong></td><td>Registro delle modifiche</td><td>che cosa è cambiato nelle varie versioni di PHP</td></tr>
+              <tr><td><strong>Examples</strong></td><td>Esempi</td><td>codice pronto da provare</td></tr>
+              <tr><td><strong>Notes</strong></td><td>Note</td><td>avvertenze e dettagli</td></tr>
+              <tr><td><strong>See Also</strong></td><td>Vedi anche</td><td>funzioni simili o collegate</td></tr>
+              <tr><td><strong>User Contributed Notes</strong></td><td>Note degli utenti</td><td>commenti scritti dai visitatori</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="box box-curiosita">
+          <p>Il manuale di PHP è scritto da volontari, il <em>PHP Documentation Group</em>, ed è distribuito con licenza Creative Commons: si può copiare e riusare citando la fonte. Per questo possiamo mostrarne gli screenshot in questa dispensa. E se trovi un errore, in fondo a ogni pagina c'è il link <em>Report a Bug</em> per segnalarlo.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           2. ANATOMIA DELLA PAGINA
+           ================================================================ -->
+      <section>
+        <h2 id="s2">2. Anatomia della pagina di date()</h2>
+
+        <p>Ecco la parte alta della pagina di <code>date</code>. Tutte le pagine delle funzioni hanno la stessa struttura: impari a leggerne una e le sai leggere tutte.</p>
+
+        <figure class="figura">
+          <img src="img/date-panoramica-annotata.png" width="1100" height="1213" alt="La pagina di date() sul manuale di PHP, con cinque zone numerate: 1 la casella Search docs in alto a destra; 2 il nome della funzione, le versioni di PHP e la frase che dice a cosa serve; 3 la firma della funzione nella sezione Description; 4 la sezione Parameters; 5 la sezione Return Values. A destra c'è l'elenco delle altre funzioni su date e orari.">
+          <figcaption>
+            La pagina di <code>date</code>: ① ricerca, ② nome e scopo, ③ firma, ④ parametri, ⑤ valore restituito.
+            <span class="crediti">Screenshot da <a href="https://www.php.net/manual/en/function.date.php">php.net</a> © PHP Documentation Group, licenza <a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>. Numerazione aggiunta.</span>
+          </figcaption>
+        </figure>
+
+        <p>A destra c'è l'elenco delle funzioni della stessa famiglia (<em>Date/Time Functions</em>); in alto, la "briciola di pane" (<em>Preface › Function Reference › …</em>) dice in quale parte del manuale ti trovi. Ora guardiamo le sezioni una per una.</p>
+
+        <h3 id="s2-1">2.1 Nome, versioni e scopo</h3>
+
+        <figure class="figura">
+          <img src="img/date-firma.png" width="1208" height="426" loading="lazy" alt="Intestazione della pagina: il titolo date, la riga (PHP 4, PHP 5, PHP 7, PHP 8), la frase date — Format a Unix timestamp, poi la sezione Description con la firma function date(string $format, ?int $timestamp = null): string.">
+          <figcaption>
+            Intestazione e firma.
+            <span class="crediti">Screenshot da <a href="https://www.php.net/manual/en/function.date.php">php.net</a> © PHP Documentation Group, CC BY 3.0.</span>
+          </figcaption>
+        </figure>
+
+        <ul>
+          <li><strong>(PHP 4, PHP 5, PHP 7, PHP 8)</strong>: le versioni di PHP in cui la funzione esiste. <code>date</code> c'è da sempre. Una funzione nuova avrebbe, per esempio, solo <em>(PHP 8)</em>: se il tuo server ha una versione più vecchia, non la troverai.</li>
+          <li><strong>date — Format a Unix timestamp</strong>: lo scopo, in una riga. "Formatta un timestamp Unix", cioè lo trasforma in un testo leggibile, nel formato che decidi tu.</li>
+        </ul>
+
+        <p>Già la prima riga contiene una parola che non conosci: <strong>timestamp</strong>. Succede spesso, leggendo la documentazione: una pagina ti rimanda a un concetto che devi capire prima. Lo affrontiamo nella <a href="#s3">sezione 3</a>.</p>
+
+        <h3 id="s2-2">2.2 Description: la firma</h3>
+
+        <p>Nel riquadro bianco sotto <em>Description</em> c'è la riga più importante della pagina, la <strong>firma</strong> (in inglese <em>signature</em>) della funzione:</p>
+
+        <script type="text/plain" data-codice="php">
+          date(string $format, ?int $timestamp = null): string
+        </script>
+
+        <p>La firma dice in una sola riga come si usa la funzione: come si chiama, quali argomenti vuole, di che tipo, quali si possono omettere e che cosa restituisce. La leggiamo pezzo per pezzo nella <a href="#s4">sezione 4</a>. Sotto la firma c'è una spiegazione a parole:</p>
+
+        <figure class="figura">
+          <img src="img/date-descrizione.png" width="1208" height="324" loading="lazy" alt="Testo della sezione Description: Returns a string formatted according to the given format string using the given integer timestamp (Unix timestamp) or the current time if no timestamp is given. In other words, timestamp is optional and defaults to the value of time(). Sotto, un riquadro Warning: Unix timestamps do not handle timezones.">
+          <figcaption>
+            La descrizione e un avviso (<em>Warning</em>).
+            <span class="crediti">Screenshot da <a href="https://www.php.net/manual/en/function.date.php">php.net</a> © PHP Documentation Group, CC BY 3.0.</span>
+          </figcaption>
+        </figure>
+
+        <p>In italiano: "Restituisce una stringa formattata secondo la stringa di formato, usando il <code>timestamp</code> intero indicato, oppure l'ora attuale se non indichi nessun timestamp. In altre parole, <code>timestamp</code> è facoltativo e il suo valore predefinito è quello di <code>time()</code>." I riquadri rosa <strong>Warning</strong> segnalano una trappola: qui avvisano che i timestamp non contengono il fuso orario. Ci torneremo.</p>
+
+        <h3 id="s2-3">2.3 Parameters</h3>
+
+        <figure class="figura">
+          <img src="img/date-parametri.png" width="1208" height="566" loading="lazy" alt="Sezione Parameters: il parametro format, descritto come Format accepted by DateTimeInterface::format(), con una nota sui microsecondi; il parametro timestamp, descritto come The optional timestamp parameter is an int Unix timestamp that defaults to the current local time if timestamp is omitted or null.">
+          <figcaption>
+            I due parametri, <code>format</code> e <code>timestamp</code>.
+            <span class="crediti">Screenshot da <a href="https://www.php.net/manual/en/function.date.php">php.net</a> © PHP Documentation Group, CC BY 3.0.</span>
+          </figcaption>
+        </figure>
+
+        <p>Ogni parametro della firma ha qui il suo paragrafo, con lo stesso nome (senza <code>$</code>):</p>
+        <ul>
+          <li><strong>format</strong>: "il formato accettato da <code>DateTimeInterface::format()</code>". La pagina non elenca le lettere del formato: ti <strong>manda a un'altra pagina</strong>, che le descrive per <code>date</code> e per altre funzioni. Lo vediamo nella <a href="#s5">sezione 5</a>;</li>
+          <li><strong>timestamp</strong>: "il parametro facoltativo <code>timestamp</code> è un timestamp Unix di tipo <code>int</code>; se lo ometti o passi <code>null</code>, vale l'ora locale attuale".</li>
+        </ul>
+
+        <h3 id="s2-4">2.4 Return Values</h3>
+
+        <figure class="figura">
+          <img src="img/date-ritorno.png" width="1208" height="168" loading="lazy" alt="Sezione Return Values: Returns a formatted date string.">
+          <figcaption>
+            Che cosa restituisce <code>date</code>.
+            <span class="crediti">Screenshot da <a href="https://www.php.net/manual/en/function.date.php">php.net</a> © PHP Documentation Group, CC BY 3.0.</span>
+          </figcaption>
+        </figure>
+
+        <p>"Restituisce una stringa con la data formattata". Restituisce, non stampa: per vederla devi passarla a <code>echo</code>, oppure salvarla in una variabile. È la stessa informazione che la firma dà con <code>: string</code> alla fine.</p>
+
+        <h3 id="s2-5">2.5 Changelog</h3>
+
+        <figure class="figura">
+          <img src="img/date-changelog.png" width="1208" height="333" loading="lazy" alt="Sezione Changelog: una tabella con una sola riga, Version 8.0.0, Description: timestamp is nullable now.">
+          <figcaption>
+            Che cosa è cambiato, versione per versione.
+            <span class="crediti">Screenshot da <a href="https://www.php.net/manual/en/function.date.php">php.net</a> © PHP Documentation Group, CC BY 3.0.</span>
+          </figcaption>
+        </figure>
+
+        <p>"Dalla versione 8.0.0, <code>timestamp</code> può essere <code>null</code>." Sembra un dettaglio, ma ti dice che su un PHP più vecchio la funzione si comporta in modo diverso. È il motivo per cui conviene sapere <strong>quale versione di PHP</strong> gira sul tuo server: XAMPP oggi ha PHP 8, EasyPHP Devserver 17 ha PHP 5.6 o 7. Per saperlo con certezza c'è una funzione:</p>
+
+        <script type="text/plain" data-php="versione.php" data-url="http://localhost/tpsit/versione.php">
+          <?php
+          echo "<p>Su questo server gira PHP " . phpversion() . "</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html data-variabile>
+          <p>Su questo server gira PHP 8.2.12</p>
+        </script>
+
+        <aside class="box box-attenzione">
+          <p>Un esempio concreto: con PHP 7, <code>date("Y", null)</code> trasforma <code>null</code> in <code>0</code> e restituisce <code>1970</code>. Con PHP 8 restituisce l'anno attuale. Stesso codice, risultato diverso: l'informazione era scritta nel Changelog.</p>
+        </aside>
+
+        <h3 id="s2-6">2.6 Examples, Notes, See Also</h3>
+
+        <figure class="figura">
+          <img src="img/date-esempi.png" width="1208" height="998" loading="lazy" alt="Sezione Examples, Example #1 date() examples: un blocco di codice PHP con date_default_timezone_set('UTC') e diverse chiamate a date con i commenti Prints something like: Monday, Prints something like: Monday 8th of August 2005 03:12:46 PM, e altre. Sotto il codice c'è il pulsante Run code.">
+          <figcaption>
+            Il primo esempio della pagina.
+            <span class="crediti">Screenshot da <a href="https://www.php.net/manual/en/function.date.php">php.net</a> © PHP Documentation Group, CC BY 3.0.</span>
+          </figcaption>
+        </figure>
+
+        <ul>
+          <li><strong>Examples</strong>: codice completo, da copiare e provare. I commenti dicono che cosa stampa ogni riga (<em>Prints something like…</em>, "stampa qualcosa come…"). Il pulsante <strong>Run code</strong> lo esegue direttamente nel sito. Gli esempi sono spesso il modo più rapido per capire una funzione: leggili sempre.</li>
+          <li><strong>Notes</strong>: avvertenze e consigli. Per <code>date</code>, per esempio, la nota suggerisce <code>strtotime()</code> per ottenere un timestamp da una data scritta come testo.</li>
+          <li><strong>See Also</strong>: le funzioni collegate. Se <code>date</code> non fa proprio quello che ti serve, qui trovi le "cugine": <code>time()</code>, <code>mktime()</code>, <code>gmdate()</code>…</li>
+        </ul>
+
+        <figure class="figura">
+          <img src="img/date-seealso.png" width="1208" height="492" loading="lazy" alt="Sezione See Also: un elenco di link, tra cui DateTimeImmutable::__construct(), DateTimeInterface::format(), gmdate(), idate(), getdate(), getlastmod(), mktime(), IntlDateFormatter::format(), time() e Predefined DateTime Constants, ognuno con una breve descrizione.">
+          <figcaption>
+            <em>See Also</em>: da qui si parte per esplorare.
+            <span class="crediti">Screenshot da <a href="https://www.php.net/manual/en/function.date.php">php.net</a> © PHP Documentation Group, CC BY 3.0.</span>
+          </figcaption>
+        </figure>
+
+        <aside class="box box-attenzione">
+          <p>In fondo a molte pagine ci sono le <strong>User Contributed Notes</strong>, commenti scritti dai visitatori. A volte sono utili, ma nessuno li controlla: alcuni hanno vent'anni e descrivono versioni di PHP che non esistono più. Il testo del manuale viene prima; le note degli utenti sono solo uno spunto da verificare.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           3. IL TIMESTAMP
+           ================================================================ -->
+      <section>
+        <h2 id="s3">3. Che cos'è un timestamp</h2>
+
+        <p>Per noi una data è fatta di pezzi: giorno, mese, anno, ore, minuti, secondi. Per un computer è scomodo: i mesi hanno lunghezze diverse, ci sono gli anni bisestili, i fusi orari, l'ora legale. Confrontare due date o calcolare "fra tre giorni" diventerebbe complicato.</p>
+
+        <p>Per questo i computer contano il tempo con <strong>un solo numero</strong>: i <strong>secondi passati da un istante preciso</strong>, scelto come punto di partenza. Quell'istante è la mezzanotte del <strong>1° gennaio 1970</strong>, all'ora di Greenwich (UTC), e si chiama <strong>epoca Unix</strong> (<em>Unix epoch</em>). Il numero di secondi passati da allora è il <strong>timestamp Unix</strong>.</p>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Timestamp</th><th>Data e ora (in Italia)</th></tr></thead>
+            <tbody>
+              <tr><td><code>0</code></td><td>1° gennaio 1970, 01:00:00</td></tr>
+              <tr><td><code>86400</code></td><td>2 gennaio 1970, 01:00:00 (un giorno = 24 × 60 × 60 = 86400 secondi)</td></tr>
+              <tr><td><code>1000000000</code></td><td>9 settembre 2001, 03:46:40</td></tr>
+              <tr><td><code>2000000000</code></td><td>18 maggio 2033, 05:33:20</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="box box-curiosita">
+          <p>Perché 01:00 e non mezzanotte? Il timestamp 0 è la mezzanotte a <strong>Greenwich</strong>. In quel momento in Italia era già l'una di notte: il nostro fuso orario è un'ora avanti (due con l'ora legale). È proprio quello che diceva il <em>Warning</em> della pagina: il timestamp non contiene il fuso orario. È lo stesso istante in tutto il mondo; <code>date</code> lo converte nell'ora locale del server.</p>
+        </aside>
+
+        <h3 id="s3-1">3.1 time(): il timestamp di adesso</h3>
+
+        <p>La funzione <code>time()</code> restituisce il timestamp di questo momento. Nella pagina di <code>date</code> era citata due volte: è il valore predefinito di <code>timestamp</code>.</p>
+
+        <script type="text/plain" data-php="adesso.php" data-url="http://localhost/tpsit/adesso.php">
+          <?php
+          echo "<p>Dal 1° gennaio 1970 sono passati " . time() . " secondi.</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html data-variabile>
+          <p>Dal 1° gennaio 1970 sono passati 1793095200 secondi.</p>
+        </script>
+
+        <aside class="box box-prova">
+          <p>Apri la pagina sul tuo server e aggiornala qualche volta con <kbd>F5</kbd>: il numero cresce di uno ogni secondo. Come sempre, il calcolo lo fa il server al momento della richiesta; nella pagina arriva solo il numero.</p>
+        </aside>
+
+        <h3 id="s3-2">3.2 Da timestamp a data: il secondo argomento di date</h3>
+
+        <p>Ora la firma di <code>date</code> ha senso: il secondo argomento, <code>$timestamp</code>, è il momento da formattare. Se non lo passi, <code>date</code> usa <code>time()</code>, cioè adesso. Se lo passi, formatta quel momento:</p>
+
+        <script type="text/plain" data-php="epoca.php" data-url="http://localhost/tpsit/epoca.php">
+          <?php
+          echo "<p>Timestamp 0: " . date("d/m/Y H:i:s", 0) . "</p>";
+          echo "<p>Timestamp 86400: " . date("d/m/Y H:i:s", 86400) . "</p>";
+          echo "<p>Timestamp 1000000000: " . date("d/m/Y H:i:s", 1000000000) . "</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <p>Timestamp 0: 01/01/1970 01:00:00</p><p>Timestamp 86400: 02/01/1970 01:00:00</p><p>Timestamp 1000000000: 09/09/2001 03:46:40</p>
+        </script>
+
+        <h3 id="s3-3">3.3 Fare i conti con le date</h3>
+
+        <p>Il vantaggio del timestamp è che è un numero intero: per spostarti nel tempo basta un'addizione. Un giorno sono 86400 secondi, quindi "domani a quest'ora" è <code>time() + 86400</code>:</p>
+
+        <script type="text/plain" data-php="domani.php" data-url="http://localhost/tpsit/domani.php">
+          <?php
+          $adesso = time();
+          $domani = $adesso + 86400;
+          $traUnaSettimana = $adesso + 7 * 86400;
+
+          echo "<p>Oggi: " . date("d/m/Y", $adesso) . "</p>";
+          echo "<p>Domani: " . date("d/m/Y", $domani) . "</p>";
+          echo "<p>Tra una settimana: " . date("d/m/Y", $traUnaSettimana) . "</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html data-variabile>
+          <p>Oggi: 27/10/2026</p><p>Domani: 28/10/2026</p><p>Tra una settimana: 03/11/2026</p>
+        </script>
+
+        <p>Allo stesso modo, la differenza tra due timestamp è il numero di secondi tra due momenti: dividendo per 86400 ottieni i giorni. Fine mese, anni bisestili e cambi di anno li gestisce <code>date</code> quando converte il numero.</p>
+
+        <aside class="box box-curiosita" data-titolo="💡 Curiosità: il problema del 2038">
+          <p>Molti sistemi vecchi salvano il timestamp in un intero a 32 bit con segno, che arriva al massimo a 2 147 483 647. Quel numero di secondi scade il <strong>19 gennaio 2038</strong> alle 03:14:07 (ora di Greenwich): un secondo dopo, il contatore "trabocca" e torna a una data del 1901. È il <em>problema dell'anno 2038</em>. PHP a 64 bit, come quello di XAMPP, usa interi molto più grandi e non ne soffre.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           4. LEGGERE LA FIRMA
+           ================================================================ -->
+      <section>
+        <h2 id="s4">4. Leggere la firma</h2>
+
+        <p>Torniamo alla riga più importante della pagina e smontiamola:</p>
+
+        <p class="firma" aria-label="Firma: date(string $format, ?int $timestamp = null): string">
+          <span class="firma-nome">date<small>nome della funzione</small></span>
+          <span class="firma-segno">(</span>
+          <span class="firma-param">string $format<small>parametro 1: obbligatorio</small></span>
+          <span class="firma-segno">,</span>
+          <span class="firma-param firma-facoltativo">?int $timestamp = null<small>parametro 2: facoltativo</small></span>
+          <span class="firma-segno">)</span>
+          <span class="firma-ritorno">: string<small>tipo del valore restituito</small></span>
+        </p>
+
+        <ul>
+          <li>Tra le parentesi ci sono i <strong>parametri</strong>, separati da virgole, nell'ordine in cui devi passare gli argomenti.</li>
+          <li>Dopo la parentesi chiusa, i due punti e il <strong>tipo restituito</strong>: <code>date</code> restituisce sempre una <code>string</code>.</li>
+        </ul>
+
+        <h3 id="s4-1">4.1 Dentro un parametro</h3>
+
+        <p>Ogni parametro è scritto con <strong>tipo</strong>, <strong>nome</strong> ed eventualmente un <strong>valore predefinito</strong>. Il secondo parametro di <code>date</code> li ha tutti:</p>
+
+        <p class="firma" aria-label="Il parametro ?int $timestamp = null">
+          <span class="firma-pezzo">?<small>può essere anche null</small></span>
+          <span class="firma-pezzo">int<small>tipo: numero intero</small></span>
+          <span class="firma-pezzo">$timestamp<small>nome del parametro</small></span>
+          <span class="firma-pezzo">= null<small>valore predefinito: il parametro è facoltativo</small></span>
+        </p>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Pezzo</th><th>Che cosa dice</th></tr></thead>
+            <tbody>
+              <tr><td><code>int</code></td><td>l'argomento deve essere un numero intero</td></tr>
+              <tr><td><code>?</code> davanti al tipo</td><td>al posto di un intero si può passare anche <code>null</code>, cioè "nessun valore"</td></tr>
+              <tr><td><code>$timestamp</code></td><td>il nome con cui il manuale parla del parametro, nella sezione <em>Parameters</em></td></tr>
+              <tr><td><code>= null</code></td><td>se non passi l'argomento, vale <code>null</code>: il parametro è <strong>facoltativo</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="box box-regola">
+          <p><strong>Regola</strong>: un parametro con <code>= valore</code> è <strong>facoltativo</strong>, e quel valore è il suo valore predefinito. Un parametro senza <code>=</code> è <strong>obbligatorio</strong>. I facoltativi stanno sempre in fondo.</p>
+        </aside>
+
+        <p>Quindi queste chiamate sono tutte corrette, e le prime tre danno lo stesso risultato:</p>
+
+        <script type="text/plain" data-php="tre-modi.php" data-url="http://localhost/tpsit/tre-modi.php">
+          <?php
+          echo "<p>" . date("Y") . "</p>";          // timestamp omesso: vale null, cioè adesso
+          echo "<p>" . date("Y", null) . "</p>";    // null esplicito: adesso (da PHP 8)
+          echo "<p>" . date("Y", time()) . "</p>";  // il timestamp di adesso, scritto per esteso
+          echo "<p>" . date("Y", 0) . "</p>";       // un timestamp preciso: il 1970
+          ?>
+        </script>
+        <script type="text/plain" data-html data-variabile>
+          <p>2026</p><p>2026</p><p>2026</p><p>1970</p>
+        </script>
+
+        <h3 id="s4-2">4.2 Quando non rispetti la firma</h3>
+
+        <p>Che cosa succede se chiami <code>date</code> senza argomenti? La firma dice che <code>$format</code> è obbligatorio:</p>
+
+        <script type="text/plain" data-php="senza-argomenti.php" data-url="http://localhost/tpsit/senza-argomenti.php">
+          <?php
+          echo date();
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <br />
+          <b>Fatal error</b>:  Uncaught ArgumentCountError: date() expects at least 1 argument, 0 given in C:\xampp\htdocs\tpsit\senza-argomenti.php:2
+          Stack trace:
+          #0 C:\xampp\htdocs\tpsit\senza-argomenti.php(2): date()
+          #1 {main}
+            thrown in <b>C:\xampp\htdocs\tpsit\senza-argomenti.php</b> on line <b>2</b><br />
+        </script>
+
+        <p>E se passi un testo dove la firma chiede un intero?</p>
+
+        <script type="text/plain" data-php="tipo-sbagliato.php" data-url="http://localhost/tpsit/tipo-sbagliato.php">
+          <?php
+          echo date("Y", "ieri");
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <br />
+          <b>Fatal error</b>:  Uncaught TypeError: date(): Argument #2 ($timestamp) must be of type ?int, string given in C:\xampp\htdocs\tpsit\tipo-sbagliato.php:2
+          Stack trace:
+          #0 C:\xampp\htdocs\tpsit\tipo-sbagliato.php(2): date('Y', 'ieri')
+          #1 {main}
+            thrown in <b>C:\xampp\htdocs\tpsit\tipo-sbagliato.php</b> on line <b>2</b><br />
+        </script>
+
+        <p>Leggi i due messaggi: <em>"date() expects at least 1 argument, 0 given"</em> ("si aspetta almeno 1 argomento, ne ha ricevuti 0") e <em>"Argument #2 ($timestamp) must be of type ?int, string given"</em> ("l'argomento numero 2, <code>$timestamp</code>, deve essere di tipo <code>?int</code>, è stata passata una stringa"). Usano <strong>le stesse parole della firma</strong>: il nome del parametro e il suo tipo, punto interrogativo compreso. Saper leggere la firma vuol dire anche saper leggere gli errori.</p>
+
+        <aside class="box box-attenzione">
+          <p>Questi sono <strong>Fatal error</strong>: come il Parse error, fermano il programma. A differenza del Parse error, però, il codice prima della riga sbagliata è già stato eseguito. Lo riconosci dalla parola <em>Uncaught</em> e dal nome dell'errore: <code>ArgumentCountError</code> (numero di argomenti sbagliato), <code>TypeError</code> (tipo sbagliato).</p>
+        </aside>
+
+        <h3 id="s4-3">4.3 I tipi che incontrerai</h3>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Nella firma</th><th>Che cosa vuol dire</th><th>Esempi di valori</th></tr></thead>
+            <tbody>
+              <tr><td><code>string</code></td><td>testo</td><td><code>"Anna"</code>, <code>"d/m/Y"</code></td></tr>
+              <tr><td><code>int</code></td><td>numero intero</td><td><code>0</code>, <code>18</code>, <code>-3</code></td></tr>
+              <tr><td><code>float</code></td><td>numero con la virgola</td><td><code>7.5</code>, <code>3.14</code></td></tr>
+              <tr><td><code>bool</code></td><td>vero o falso</td><td><code>true</code>, <code>false</code></td></tr>
+              <tr><td><code>array</code></td><td>elenco di coppie chiave → valore</td><td><code>["nome" =&gt; "Anna"]</code></td></tr>
+              <tr><td><code>null</code></td><td>nessun valore</td><td><code>null</code></td></tr>
+              <tr><td><code>?int</code></td><td>un intero <strong>oppure</strong> <code>null</code></td><td><code>5</code>, <code>null</code></td></tr>
+              <tr><td><code>int|false</code></td><td>un intero <strong>oppure</strong> <code>false</code> (spesso: "in caso di errore restituisce false")</td><td><code>1793095200</code>, <code>false</code></td></tr>
+              <tr><td><code>mixed</code></td><td>qualsiasi tipo</td><td>tutti i precedenti</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="box box-curiosita">
+          <p>Il nome del parametro non serve solo al manuale. Da PHP 8 si può usare anche nella chiamata, con gli <strong>argomenti con nome</strong>: <code>date(format: "Y", timestamp: 0)</code>. Lo vedrai nel codice degli altri; noi, per ora, passiamo gli argomenti in ordine.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           5. I CARATTERI DI FORMATO
+           ================================================================ -->
+      <section>
+        <h2 id="s5">5. Seguire un rimando: i caratteri di formato</h2>
+
+        <blockquote class="traccia">
+          <p>Scrivi una pagina che mostri la data di oggi con il nome del giorno della settimana, per esempio "martedì 27 ottobre 2026".</p>
+        </blockquote>
+
+        <p>Per farlo ti servono le lettere del formato. La sezione <em>Parameters</em> di <code>date</code> diceva: <em>"Format accepted by DateTimeInterface::format()"</em>. Il link porta alla pagina <code>https://www.php.net/manual/en/datetime.format.php</code>, che contiene una lunga tabella divisa per gruppi (<em>Day</em>, <em>Week</em>, <em>Month</em>, <em>Year</em>, <em>Time</em>…):</p>
+
+        <figure class="figura">
+          <img src="img/format-tabella.png" width="1106" height="1056" loading="lazy" alt="Inizio della tabella The following characters are recognized in the format parameter string. Per ogni carattere ci sono tre righe: format character, Description, Example returned values. Si vedono il gruppo Day, il carattere d (Day of the month, 2 digits with leading zeros, da 01 a 31) e il carattere D (A textual representation of a day, three letters, da Mon a Sun).">
+          <figcaption>
+            L'inizio della tabella dei caratteri di formato.
+            <span class="crediti">Screenshot da <a href="https://www.php.net/manual/en/datetime.format.php">php.net</a> © PHP Documentation Group, CC BY 3.0.</span>
+          </figcaption>
+        </figure>
+
+        <p>Ogni carattere ha tre righe: il <strong>carattere</strong> (<em>format character</em>), che cosa rappresenta (<em>Description</em>) e i valori che produce (<em>Example returned values</em>). Ecco, tradotti, quelli che userai più spesso:</p>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Carattere</th><th>Significato</th><th>Valori</th></tr></thead>
+            <tbody>
+              <tr><td><code>d</code></td><td>giorno del mese, 2 cifre</td><td><code>01</code> … <code>31</code></td></tr>
+              <tr><td><code>j</code></td><td>giorno del mese, senza zero iniziale</td><td><code>1</code> … <code>31</code></td></tr>
+              <tr><td><code>D</code></td><td>giorno della settimana, 3 lettere <strong>in inglese</strong></td><td><code>Mon</code> … <code>Sun</code></td></tr>
+              <tr><td><code>l</code> (elle minuscola)</td><td>giorno della settimana per esteso, <strong>in inglese</strong></td><td><code>Monday</code> … <code>Sunday</code></td></tr>
+              <tr><td><code>N</code></td><td>giorno della settimana come numero (ISO 8601)</td><td><code>1</code> (lunedì) … <code>7</code> (domenica)</td></tr>
+              <tr><td><code>m</code></td><td>mese, 2 cifre</td><td><code>01</code> … <code>12</code></td></tr>
+              <tr><td><code>n</code></td><td>mese, senza zero iniziale</td><td><code>1</code> … <code>12</code></td></tr>
+              <tr><td><code>F</code></td><td>nome del mese per esteso, <strong>in inglese</strong></td><td><code>January</code> … <code>December</code></td></tr>
+              <tr><td><code>Y</code></td><td>anno, 4 cifre</td><td><code>1999</code>, <code>2026</code></td></tr>
+              <tr><td><code>y</code></td><td>anno, 2 cifre</td><td><code>99</code>, <code>26</code></td></tr>
+              <tr><td><code>H</code></td><td>ora (0–23), 2 cifre</td><td><code>00</code> … <code>23</code></td></tr>
+              <tr><td><code>i</code></td><td>minuti, 2 cifre</td><td><code>00</code> … <code>59</code></td></tr>
+              <tr><td><code>s</code></td><td>secondi, 2 cifre</td><td><code>00</code> … <code>59</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Tutti gli altri caratteri della stringa di formato (barre, trattini, due punti, spazi) vengono copiati così come sono. Proviamo con il timestamp <code>1000000000</code>, così il risultato è sempre lo stesso:</p>
+
+        <script type="text/plain" data-php="giorni.php" data-url="http://localhost/tpsit/giorni.php">
+          <?php
+          $momento = 1000000000;
+          echo "<p>" . date("d/m/Y", $momento) . "</p>";
+          echo "<p>" . date("D j/n/y", $momento) . "</p>";
+          echo "<p>" . date("l j F Y", $momento) . "</p>";
+          echo "<p>Giorno numero " . date("N", $momento) . " della settimana</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <p>09/09/2001</p><p>Sun 9/9/01</p><p>Sunday 9 September 2001</p><p>Giorno numero 7 della settimana</p>
+        </script>
+
+        <aside class="box box-attenzione">
+          <p>La traccia chiedeva "martedì", ma <code>D</code>, <code>l</code> e <code>F</code> danno i nomi <strong>in inglese</strong>. Era scritto nella tabella: <em>Mon through Sun</em>. Ed era scritto anche nella pagina di <code>date</code>, sotto gli esempi: <em>"To format dates in other languages, IntlDateFormatter::format() can be used instead"</em>. Leggere la documentazione ti evita di scoprirlo dopo un'ora di tentativi.</p>
+        </aside>
+
+        <p>Come ottenere il giorno in italiano senza funzioni nuove? Hai già tutto: <code>date("N")</code> dà un numero da 1 a 7, e un array di coppie chiave → valore può tradurre quel numero in un nome. È l'esercizio 4 in fondo alla dispensa.</p>
+
+        <aside class="box box-curiosita">
+          <p>Per scrivere una lettera che è anche un carattere di formato, mettici davanti una barra rovesciata: <code>date('\o\r\e H')</code> scrive "ore 15" invece di interpretare <code>o</code>, <code>r</code> ed <code>e</code>. Usa le virgolette singole, perché tra le doppie <code>\r</code> e <code>\n</code> hanno un altro significato. Era il secondo esempio della pagina.</p>
+        </aside>
+      </section>
+
+      <!-- ================================================================
+           6. UN METODO PER OGNI PAGINA
+           ================================================================ -->
+      <section>
+        <h2 id="s6">6. Un metodo per leggere qualsiasi pagina</h2>
+
+        <aside class="box box-regola">
+          <p><strong>Davanti a una funzione nuova</strong>, leggi la pagina in questo ordine:</p>
+          <ol>
+            <li><strong>Nome e scopo</strong>: fa quello che mi serve?</li>
+            <li><strong>Firma</strong>: quanti argomenti, di che tipo, quali facoltativi, che cosa restituisce?</li>
+            <li><strong>Parameters</strong>: che cosa vuol dire ogni argomento? Ci sono rimandi da seguire?</li>
+            <li><strong>Return Values</strong>: che cosa ottengo, anche in caso di errore?</li>
+            <li><strong>Examples</strong>: provo un esempio e lo modifico.</li>
+            <li><strong>Changelog</strong>: vale anche per la versione di PHP del mio server?</li>
+          </ol>
+        </aside>
+
+        <h3 id="s6-1">6.1 Prova con mktime</h3>
+
+        <p>Nel <em>See Also</em> di <code>date</code> c'era <code>mktime()</code>: <em>"Get Unix timestamp for a date"</em>, cioè "ottieni il timestamp di una data". È il contrario di <code>date</code>: dai giorno, mese e anno e ottieni il numero. Ecco la sua firma:</p>
+
+        <script type="text/plain" data-codice="php">
+          mktime(int $hour, ?int $minute = null, ?int $second = null, ?int $month = null, ?int $day = null, ?int $year = null): int|false
+        </script>
+
+        <p>Applica il metodo:</p>
+        <ul>
+          <li>sei parametri, tutti interi; solo il primo, <code>$hour</code>, è obbligatorio;</li>
+          <li>l'<strong>ordine</strong> è ora, minuti, secondi, <strong>mese, giorno</strong>, anno: non giorno, mese, anno come in italiano. È la trappola classica, e la firma te la mostra;</li>
+          <li>restituisce <code>int|false</code>: il timestamp, oppure <code>false</code> se qualcosa va storto.</li>
+        </ul>
+
+        <script type="text/plain" data-php="natale.php" data-url="http://localhost/tpsit/natale.php">
+          <?php
+          // ora, minuti, secondi, MESE, GIORNO, anno
+          $natale = mktime(9, 30, 0, 12, 25, 2026);
+          echo "<p>Timestamp: " . $natale . "</p>";
+          echo "<p>Data: " . date("d/m/Y H:i", $natale) . "</p>";
+          echo "<p>Giorno della settimana: " . date("l", $natale) . "</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <p>Timestamp: 1798187400</p><p>Data: 25/12/2026 09:30</p><p>Giorno della settimana: Friday</p>
+        </script>
+
+        <h3 id="s6-2">6.2 Prova con number_format</h3>
+
+        <p>Un'altra firma, con parametri facoltativi di tipo stringa:</p>
+
+        <script type="text/plain" data-codice="php">
+          number_format(float $num, int $decimals = 0, ?string $decimal_separator = ".", ?string $thousands_separator = ","): string
+        </script>
+
+        <p>Lo scopo è <em>"Format a number with grouped thousands"</em>: formatta un numero raggruppando le migliaia. Solo <code>$num</code> è obbligatorio. Se non passi gli altri valgono i predefiniti: <strong>0 decimali</strong>, il <strong>punto</strong> per i decimali e la <strong>virgola</strong> per le migliaia, come si scrive in inglese. Per l'italiano devi passarli tutti e quattro:</p>
+
+        <script type="text/plain" data-php="prezzo.php" data-url="http://localhost/tpsit/prezzo.php">
+          <?php
+          $prezzo = 1234.5;
+          echo "<p>" . number_format($prezzo) . "</p>";
+          echo "<p>" . number_format($prezzo, 2) . "</p>";
+          echo "<p>" . number_format($prezzo, 2, ",", ".") . " €</p>";
+          ?>
+        </script>
+        <script type="text/plain" data-html>
+          <p>1,235</p><p>1,234.50</p><p>1.234,50 €</p>
+        </script>
+
+        <p>Nella prima riga <code>1234.5</code> è diventato <code>1,235</code>: zero decimali, quindi arrotondato, e la virgola delle migliaia all'inglese. Nessun errore, ma un risultato che non volevi. Le informazioni per evitarlo erano tutte nella firma, nei valori predefiniti.</p>
+      </section>
+
+      <!-- ================================================================
+           7. RIEPILOGO ED ESERCIZI
+           ================================================================ -->
+      <section>
+        <h2 id="s7">7. Riepilogo ed esercizi</h2>
+
+        <div class="tabella">
+          <table>
+            <thead><tr><th>Concetto</th><th>In una frase</th></tr></thead>
+            <tbody>
+              <tr><td>manuale di PHP</td><td><code>php.net/nomefunzione</code>, in inglese: sempre aggiornato</td></tr>
+              <tr><td>firma</td><td>nome, parametri con tipo, valori predefiniti e tipo restituito, in una riga</td></tr>
+              <tr><td><code>= valore</code></td><td>il parametro è facoltativo e quello è il suo valore predefinito</td></tr>
+              <tr><td><code>?tipo</code></td><td>il tipo indicato oppure <code>null</code></td></tr>
+              <tr><td><code>: tipo</code> in fondo</td><td>il tipo del valore restituito</td></tr>
+              <tr><td>Changelog</td><td>che cosa cambia tra le versioni di PHP; <code>phpversion()</code> dice la tua</td></tr>
+              <tr><td>timestamp Unix</td><td>i secondi passati dal 1° gennaio 1970, 00:00:00 UTC</td></tr>
+              <tr><td><code>time()</code></td><td>il timestamp di adesso</td></tr>
+              <tr><td><code>date(formato, timestamp)</code></td><td>da timestamp a testo; senza timestamp usa adesso</td></tr>
+              <tr><td><code>mktime(h, i, s, mese, giorno, anno)</code></td><td>da data a timestamp; attenzione all'ordine</td></tr>
+              <tr><td>errori di chiamata</td><td><code>ArgumentCountError</code> e <code>TypeError</code> usano le parole della firma</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 1. Caccia al tesoro nel manuale">
+          <p>Apri le pagine di <code>strlen</code>, <code>strtoupper</code> e <code>str_repeat</code> su php.net. Per ognuna scrivi: lo scopo tradotto in italiano, la firma, quali parametri sono obbligatori e il tipo restituito. Da quale versione di PHP esiste ciascuna?</p>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 2. Prevedi senza eseguire">
+          <p>Usando solo la tabella dei formati, scrivi su un foglio che cosa restituiscono queste chiamate. Poi verifica sul tuo server.</p>
+          <script type="text/plain" data-codice="php">
+            date("Y-m-d", 0)
+            date("H:i", 3600)
+            date("d/m/Y", 86400 * 365)
+            date("D", 1000000000 + 86400)
+          </script>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 3. Il conto alla rovescia">
+          <p>Crea <code>conto.php</code>: con <code>mktime</code> calcola il timestamp del prossimo 1° gennaio a mezzanotte e scrivi quanti giorni mancano, partendo da <code>time()</code>. Il numero dei giorni deve essere intero: cerca nel manuale una funzione che arrotonda per difetto (suggerimento: guarda il <em>See Also</em> di <code>round</code>).</p>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 4. I giorni in italiano">
+          <p>Crea <code>oggi.php</code>, che scriva la data di oggi come "martedì 27 ottobre 2026". Usa due array di coppie chiave → valore: uno che a ogni numero di <code>date("N")</code> associa il nome del giorno, l'altro che a ogni numero di <code>date("n")</code> associa il nome del mese.</p>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 5. Leggi l'errore">
+          <p>Per ognuna di queste chiamate, guarda la firma nel manuale e prevedi se funziona, se dà <code>ArgumentCountError</code> o se dà <code>TypeError</code>. Poi verifica.</p>
+          <script type="text/plain" data-codice="php">
+            str_repeat("ciao")
+            str_repeat("ciao", 3)
+            str_repeat("ciao", "tre")
+            strtoupper()
+            number_format(1500.75, 1)
+          </script>
+        </aside>
+
+        <aside class="box box-prova-tu" data-titolo="✎ Prova tu: 6. Il prezzo in euro">
+          <p>Come nel modulo 02, crea un modulo HTML in POST che chiede un prezzo e una quantità. La pagina di risposta mostra il totale in formato italiano, con due decimali e il simbolo €, usando <code>number_format</code>. Ricordati che dal modulo arrivano stringhe.</p>
+        </aside>
+      </section>
+
+      <nav class="nav-moduli" data-navigazione-moduli aria-label="Altri moduli"></nav>
+    </main>
+  </div>
+
+</body>
+</html>

@@ -58,6 +58,43 @@ window.CORSO = {
         { id: "s7", titolo: "7. Riepilogo ed esercizi" }
       ],
       stato: "pubblicato"
+    },
+    {
+      id: "03-documentazione",
+      numero: 3,
+      titolo: "Leggere la documentazione: date() e il timestamp",
+      descrizione: "Come si legge una pagina del manuale di PHP: la firma, i parametri facoltativi, i tipi. E che cos'è un timestamp.",
+      argomenti: ["php.net", "firma", "parametri", "valori predefiniti", "tipi", "timestamp", "time", "date", "mktime", "number_format"],
+      percorso: "moduli/03-documentazione/index.html",
+      sezioni: [
+        { id: "s1", titolo: "1. Il manuale di PHP" },
+        { id: "s2", titolo: "2. Anatomia della pagina di date()" },
+        { id: "s3", titolo: "3. Che cos'è un timestamp" },
+        { id: "s4", titolo: "4. Leggere la firma" },
+        { id: "s5", titolo: "5. Seguire un rimando: i caratteri di formato" },
+        { id: "s6", titolo: "6. Un metodo per leggere qualsiasi pagina" },
+        { id: "s7", titolo: "7. Riepilogo ed esercizi" }
+      ],
+      stato: "pubblicato"
+    },
+    {
+      id: "04-file",
+      numero: 4,
+      titolo: "Gestione dei file in PHP",
+      descrizione: "Apertura, scrittura, lettura e chiusura di un file di testo: i record restano sul server da una richiesta all'altra.",
+      argomenti: ["fopen", "modalità a e r", "stream", "record", ".=", "fwrite", "fgets", "feof", "fclose"],
+      percorso: "moduli/04-file/index.html",
+      sezioni: [
+        { id: "s1", titolo: "1. Le operazioni su un file di testo" },
+        { id: "s2", titolo: "2. Apertura del file: fopen()" },
+        { id: "s3", titolo: "3. Preparazione del record" },
+        { id: "s4", titolo: "4. Registrazione e chiusura: fwrite() e fclose()" },
+        { id: "s5", titolo: "5. Lettura di tutti i record: fgets()" },
+        { id: "s6", titolo: "6. Chiusura del file: fclose()" },
+        { id: "s7", titolo: "7. Esempio completo: scrittura e successiva lettura" },
+        { id: "s8", titolo: "8. Riepilogo ed esercizi" }
+      ],
+      stato: "pubblicato"
     }
   ],
 

@@ -18,6 +18,8 @@ Per provare il PHP, invece, serve un server: in laboratorio usiamo **XAMPP** o *
 |---|--------|-----------|
 | 01 | [Primi passi con PHP](moduli/01-primi-passi/index.html) | client e server, XAMPP ed EasyPHP, porte e `localhost`, DocumentRoot, `httpd.conf`, `<?php ?>`, `echo`, variabili, virgolette, commenti, errori |
 | 02 | [Dati dal browser: GET, POST e superglobali](moduli/02-superglobali/index.html) | coppie chiave → valore, array, superglobali, query string, `$_GET`, moduli HTML, `$_POST`, GET o POST, `$_SERVER["REQUEST_METHOD"]`, `isset`, `htmlspecialchars` |
+| 03 | [Leggere la documentazione: date() e il timestamp](moduli/03-documentazione/index.html) | il manuale su php.net, anatomia di una pagina, firma di una funzione, parametri facoltativi e tipi, timestamp Unix, `time`, `date`, `mktime`, `number_format` |
+| 04 | [Gestione dei file in PHP](moduli/04-file/index.html) | `fopen` in modalità `"a"` e `"r"`, `$file` booleano e stream, preparazione del record con `.=`, separatori `;` e `\n`, `fwrite`, lettura con `while (!feof)` e `fgets`, `fclose` |
 
 ## Aprire le pagine in locale
 
@@ -89,6 +91,20 @@ Per un esempio che riceve dati, aggiungi al primo blocco la richiesta: compare l
 
 Negli attributi la `&` si scrive `&amp;`.
 
+Per gli esempi che usano file di dati, prima del blocco PHP puoi mettere com'è il file sul server
+prima della richiesta e, dopo il blocco `data-html`, com'è dopo (lascialo vuoto: lo riempie `--riempi`):
+
+```html
+<script type="text/plain" data-file-prima="iscritti.txt">
+Rossi; Anna; 5A;
+</script>
+<script type="text/plain" data-php="registra.php"> ... </script>
+<script type="text/plain" data-html></script>
+<script type="text/plain" data-file-dopo="iscritti.txt"></script>
+```
+
+Ogni riga del blocco è una riga del file; nella pagina gli a capo compaiono come ↵.
+
 ## Controllare gli esempi
 
 Con PHP installato sul computer, dalla cartella del corso:
@@ -110,4 +126,6 @@ confrontati. Gli errori vengono riprodotti come in XAMPP, con il percorso
 
 - Screenshot di XAMPP Control Panel: Drstrange85 ([CC BY-SA 4.0](https://commons.wikimedia.org/wiki/File:XAMPP_for_Windows_11.png), ritagliato)
   e VulcanSphere ([GPL](https://commons.wikimedia.org/wiki/File:XAMPP_Windows_10.PNG)), da Wikimedia Commons.
+- Screenshot del manuale di PHP (modulo 03): © PHP Documentation Group, [CC BY 3.0](https://www.php.net/manual/en/copyright.php).
+  Si rifanno con `python3 controlli/catture-php-net.py` (servono Chrome, ImageMagick e `pip install websocket-client`).
 - Screenshot della Dashboard di EasyPHP: [Finxter, "Setup the EasyPHP Dashboard"](https://blog.finxter.com/setup-the-easyphp-dashboard/).
